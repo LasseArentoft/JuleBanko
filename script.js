@@ -15,9 +15,26 @@
   const recentEl = $("recent");
   const countEl = $("count");
   const burstEl = $("burst");
+  const bankoBtn = $("bankoBtn");
+  const prizeEl = $("prize");
+  const dialog = $("checkDialog");
+  const checkInput = $("checkInput");
+  const checkChips = $("checkChips");
+  const checkResult = $("checkResult");
+  const approveBtn = $("approveBtn");
+
+  // Gevinster: antal tal der skal kontrolleres (5 pr. række på en plade)
+  const PRIZES = [
+    { name: "1 række", need: 5 },
+    { name: "2 rækker", need: 10 },
+    { name: "Fuld plade", need: 15 },
+  ];
+  const PRIZE_KEY = "julebanko-gevinst";
 
   let drawn = load();
   let busy = false;
+  let prizeIdx = loadPrize();
+  let checkOk = false;
 
   // ---------- Storage (fails quietly if blocked) ----------
   function load() {
@@ -30,6 +47,17 @@
   }
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(drawn)); } catch (e) {}
+  }
+  function loadPrize() {
+    try {
+      const n = parseInt(localStorage.getItem(PRIZE_KEY), 10);
+      return n >= 0 && n <= PRIZES.length ? n : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+  function savePrize() {
+    try { localStorage.setItem(PRIZE_KEY, String(prizeIdx)); } catch (e) {}
   }
 
   // ---------- Board ----------
@@ -62,8 +90,11 @@
       recentEl.appendChild(li);
     }
 
+    prizeEl.textContent = PRIZES[prizeIdx] ? PRIZES[prizeIdx].name : "Alle gevinster er uddelt";
+
     const done = drawn.length >= MAX;
     drawBtn.disabled = busy || done;
+    bankoBtn.disabled = busy || drawn.length === 0;
     undoBtn.disabled = busy || drawn.length === 0;
     resetBtn.disabled = busy || drawn.length === 0;
   }
@@ -128,9 +159,139 @@
     if (busy || !drawn.length) return;
     if (!confirm("Start forfra? Alle trukne numre bliver nulstillet.")) return;
     drawn = [];
+    prizeIdx = 0;
     save();
+    savePrize();
     statusEl.textContent = "Tryk for at trække det første nummer";
     render();
+  }
+
+  // ---------- Banko-kontrol ----------
+  function parseNumbers(text) {
+    const tokens = text.split(/[^0-9]+/).filter(Boolean).map(Number);
+    return [...new Set(tokens)];
+  }
+
+  function danskListe(list) {
+    if (list.length <= 1) return list.join("");
+    return list.slice(0, -1).join(", ") + " og " + list[list.length - 1];
+  }
+
+  function runCheck() {
+    const nums = parseNumbers(checkInput.value);
+    const prize = PRIZES[prizeIdx] || PRIZES[PRIZES.length - 1];
+    checkChips.innerHTML = "";
+    checkOk = false;
+    approveBtn.hidden = true;
+    checkResult.className = "result";
+
+    if (!nums.length) {
+      checkResult.textContent = "";
+      return;
+    }
+
+    const invalid = [];
+    const missing = [];
+    for (const n of nums) {
+      const li = document.createElement("li");
+      if (n < 1 || n > MAX) {
+        li.className = "invalid";
+        li.textContent = "? " + n;
+        invalid.push(n);
+      } else if (drawn.includes(n)) {
+        li.className = "ok";
+        li.textContent = "✓ " + n;
+      } else {
+        li.className = "missing";
+        li.textContent = "✗ " + n;
+        missing.push(n);
+      }
+      checkChips.appendChild(li);
+    }
+
+    checkResult.classList.add("bad");
+    if (invalid.length) {
+      checkResult.textContent = danskListe(invalid) + " er ikke et banko-nummer (1–" + MAX + ").";
+    } else if (missing.length) {
+      checkResult.textContent = "Ikke banko endnu – " + danskListe(missing) + " er ikke trukket.";
+    } else if (nums.length < prize.need) {
+      checkResult.textContent = "Alle tal er trukket, men " + prize.name.toLowerCase() + " kræver " + prize.need + " tal. Du har skrevet " + nums.length + ".";
+    } else {
+      checkOk = true;
+      checkResult.classList.replace("bad", "good");
+      checkResult.textContent = "Kontrol bestået – nemmere end en lønkørsel.";
+      approveBtn.hidden = !PRIZES[prizeIdx];
+    }
+  }
+
+  function openCheck() {
+    if (busy || !drawn.length) return;
+    const prize = PRIZES[prizeIdx];
+    $("checkHint").textContent = prize
+      ? "Der spilles om " + prize.name.toLowerCase() + " (" + prize.need + " tal). Skriv tallene, adskilt af mellemrum eller komma."
+      : "Alle gevinster er uddelt, men du kan stadig kontrollere tal.";
+    checkInput.value = "";
+    runCheck();
+    dialog.showModal();
+    checkInput.focus();
+  }
+
+  function approve() {
+    if (!checkOk || !PRIZES[prizeIdx]) return;
+    const won = PRIZES[prizeIdx].name;
+    prizeIdx++;
+    savePrize();
+    dialog.close();
+    statusEl.textContent = "BANKO! " + won + " er godkendt" +
+      (PRIZES[prizeIdx] ? " – nu spilles der om " + PRIZES[prizeIdx].name.toLowerCase() : " – tillykke, spillet er slut!");
+    render();
+    confetti();
+  }
+
+  // ---------- Konfetti ----------
+  const confettiCanvas = $("confetti");
+  const cctx = confettiCanvas.getContext("2d");
+
+  function confetti() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    confettiCanvas.width = innerWidth;
+    confettiCanvas.height = innerHeight;
+    const colors = ["#f0b94a", "#ffe19a", "#f7f3ec", "#e2475a", "#3fa37a"];
+    const pieces = Array.from({ length: 180 }, () => ({
+      x: innerWidth / 2 + (Math.random() - 0.5) * 120,
+      y: innerHeight * 0.55,
+      vx: (Math.random() - 0.5) * 16,
+      vy: -8 - Math.random() * 12,
+      w: 6 + Math.random() * 7,
+      h: 4 + Math.random() * 5,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let alive = false;
+      for (const p of pieces) {
+        p.vy += 0.35;
+        p.vx *= 0.99;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+        if (p.y < confettiCanvas.height + 20) alive = true;
+        cctx.save();
+        cctx.translate(p.x, p.y);
+        cctx.rotate(p.rot);
+        cctx.fillStyle = p.color;
+        cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        cctx.restore();
+      }
+      if (alive && elapsed < 6000) requestAnimationFrame(frame);
+      else cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+    requestAnimationFrame(frame);
   }
 
   // ---------- Sparkles ----------
@@ -171,8 +332,12 @@
   drawBtn.addEventListener("click", draw);
   undoBtn.addEventListener("click", undo);
   resetBtn.addEventListener("click", reset);
+  bankoBtn.addEventListener("click", openCheck);
+  checkInput.addEventListener("input", runCheck);
+  approveBtn.addEventListener("click", approve);
   document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement)) {
+    if (dialog.open) return;
+    if (e.code === "Space" && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
       e.preventDefault();
       draw();
     }

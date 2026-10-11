@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Julebanko</title>
+  <title>DataLøn Julebanko</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
   <canvas id="snow" aria-hidden="true"></canvas>
 
   <main>
-    <h1>Julebanko</h1>
+    <h1>DataLøn Julebanko</h1>
 
     <section class="stage" aria-label="Seneste nummer">
       <div class="hanger" id="hanger">
@@ -26,7 +26,11 @@
       </div>
       <p class="status" id="status">Tryk for at trække det første nummer</p>
 
-      <button id="drawBtn" class="draw">Træk nummer</button>
+      <div class="actions">
+        <button id="drawBtn" class="draw">Træk nummer</button>
+        <button id="bankoBtn" class="banko">BANKO!</button>
+      </div>
+      <p class="prize">Der spilles om: <strong id="prize">1 række</strong></p>
 
       <div class="tools">
         <button id="undoBtn" class="ghost">Fortryd</button>
@@ -45,6 +49,22 @@
       <div class="board" id="board"></div>
     </section>
   </main>
+
+  <dialog id="checkDialog" aria-labelledby="checkTitle">
+    <form method="dialog" class="check">
+      <h2 id="checkTitle">Banko! Lad os kontrollere</h2>
+      <p class="hint" id="checkHint">Skriv tallene fra rækken eller pladen, adskilt af mellemrum eller komma.</p>
+      <textarea id="checkInput" rows="3" placeholder="fx 4 17 23 58 81" inputmode="numeric" aria-describedby="checkHint"></textarea>
+      <ul id="checkChips" class="chips"></ul>
+      <p id="checkResult" class="result" aria-live="polite"></p>
+      <div class="check-actions">
+        <button class="ghost" value="cancel">Luk</button>
+        <button type="button" id="approveBtn" class="draw small" hidden>Godkend banko</button>
+      </div>
+    </form>
+  </dialog>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
 
   <script src="script.js"></script>
 </body>

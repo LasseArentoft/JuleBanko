@@ -185,6 +185,34 @@ button { font: inherit; cursor: pointer; }
 .draw:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 #a8791f; }
 .draw:disabled { opacity: 0.55; cursor: default; }
 
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.banko {
+  background: radial-gradient(circle at 35% 25%, #e2475a, var(--bordeaux) 70%);
+  color: var(--snow);
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  padding: 0.9rem 2rem;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 0 var(--bordeaux-dark);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.banko:hover:not(:disabled) { transform: translateY(1px); box-shadow: 0 5px 0 var(--bordeaux-dark); }
+.banko:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 var(--bordeaux-dark); }
+.banko:disabled { opacity: 0.45; cursor: default; }
+
+.prize { margin: 1.4rem 0 0; color: var(--muted); }
+.prize strong { color: var(--gold); }
+
 .tools {
   display: flex;
   gap: 1rem;
@@ -267,6 +295,82 @@ button { font: inherit; cursor: pointer; }
 }
 @keyframes glow {
   50% { box-shadow: 0 0 0 6px rgba(226,71,90,0.35); }
+}
+
+/* ---------- Banko check dialog ---------- */
+dialog {
+  width: min(92vw, 460px);
+  padding: 0;
+  border: 2px solid var(--gold);
+  border-radius: 20px;
+  background: var(--pine-deep);
+  color: var(--snow);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+}
+dialog::backdrop { background: rgba(5, 15, 11, 0.7); }
+
+.check { padding: 1.4rem 1.4rem 1.2rem; }
+.check h2 {
+  margin: 0 0 0.3rem;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+.hint { margin: 0 0 0.8rem; color: var(--muted); font-size: 0.95rem; }
+
+.check textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(247,243,236,0.35);
+  background: rgba(247,243,236,0.08);
+  color: var(--snow);
+  font: inherit;
+  font-size: 1.15rem;
+}
+.check textarea::placeholder { color: rgba(247,243,236,0.4); }
+
+.chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+}
+.chips li {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid transparent;
+}
+.chips li.ok { background: var(--gold); color: var(--pine-deep); }
+.chips li.missing { background: transparent; color: #ff9aa6; border-color: #ff9aa6; text-decoration: line-through; }
+.chips li.invalid { background: transparent; color: #ff9aa6; border-color: #ff9aa6; border-style: dashed; }
+
+.result { min-height: 1.5em; margin: 0.8rem 0 0; font-weight: 600; }
+.result.good { color: var(--gold); }
+.result.bad { color: #ff9aa6; }
+
+.check-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 1rem;
+}
+.draw.small { padding: 0.55rem 1.4rem; font-size: 1rem; box-shadow: 0 4px 0 #a8791f; }
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
 }
 
 /* ---------- Small screens ---------- */
