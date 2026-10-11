@@ -6,6 +6,8 @@
   const $ = (id) => document.getElementById(id);
   const numberEl = $("number");
   const baubleEl = $("bauble");
+  const hangerEl = $("hanger");
+  const SHAKE_MS = 1100; // hvor længe posen ryster
   const statusEl = $("status");
   const drawBtn = $("drawBtn");
   const undoBtn = $("undoBtn");
@@ -114,21 +116,19 @@
     for (let n = 1; n <= MAX; n++) if (!drawn.includes(n)) remaining.push(n);
     const pick = remaining[Math.floor(Math.random() * remaining.length)];
 
-    statusEl.textContent = "Trækker…";
-    baubleEl.classList.remove("landed");
-    baubleEl.classList.add("shuffling");
+    statusEl.textContent = "Ryst, ryst, ryst…";
+    baubleEl.classList.remove("emerge");
+    hangerEl.classList.add("drawing");
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduce ? 300 : 900;
-    const tick = setInterval(() => {
-      numberEl.textContent = 1 + Math.floor(Math.random() * MAX);
-    }, 70);
+    const duration = reduce ? 300 : SHAKE_MS;
+    playRattle(duration);
 
     setTimeout(() => {
-      clearInterval(tick);
-      baubleEl.classList.remove("shuffling");
+      hangerEl.classList.remove("drawing");
       void baubleEl.offsetWidth; // restart animation
-      baubleEl.classList.add("landed");
+      baubleEl.classList.add("emerge");
+      playPlop();
 
       drawn.push(pick);
       save();
@@ -153,8 +153,49 @@
     if (!confirm("Start forfra? Alle trukne numre bliver nulstillet.")) return;
     drawn = [];
     save();
-    statusEl.textContent = "Tryk for at trække det første nummer";
+    statusEl.textContent = "Ryst posen for at trække det første nummer";
     render();
+  }
+
+  // ---------- Lyd til posen ----------
+  function playRattle(ms) {
+    const ac = getAudio();
+    if (!ac) return;
+    const t0 = ac.currentTime + 0.02;
+    const clicks = Math.round(ms / 40);
+    for (let i = 0; i < clicks; i++) {
+      const t = t0 + (i / clicks) * (ms / 1000) + rand(0, 0.025);
+      const len = Math.floor(ac.sampleRate * 0.03);
+      const buf = ac.createBuffer(1, len, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let j = 0; j < len; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 2);
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      const f = ac.createBiquadFilter();
+      f.type = "bandpass";
+      f.frequency.value = rand(1800, 4400);
+      f.Q.value = 3;
+      const g = ac.createGain();
+      g.gain.value = rand(0.25, 0.65);
+      src.connect(f).connect(g).connect(ac.destination);
+      src.start(t);
+    }
+  }
+
+  function playPlop() {
+    const ac = getAudio();
+    if (!ac) return;
+    const t = ac.currentTime;
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(260, t);
+    o.frequency.exponentialRampToValueAtTime(620, t + 0.12);
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    o.connect(g).connect(ac.destination);
+    o.start(t);
+    o.stop(t + 0.25);
   }
 
   // ---------- Banko-kontrol ----------
