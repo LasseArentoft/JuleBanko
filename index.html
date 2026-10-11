@@ -17,19 +17,12 @@
 
     <section class="stage" aria-label="Seneste nummer">
       <div class="hanger" id="hanger">
-        <div class="string"></div>
-        <div class="cap"></div>
         <div class="bauble" id="bauble">
           <span id="number" aria-live="polite">?</span>
         </div>
         <div class="shout" aria-hidden="true">Ryst posen!</div>
         <svg class="sack" viewBox="0 0 240 270" aria-hidden="true" focusable="false">
           <ellipse class="sack-shadow" cx="120" cy="262" rx="82" ry="8"/>
-          <g class="peek">
-            <circle class="b1" cx="96" cy="72" r="15"/>
-            <circle class="b2" cx="123" cy="58" r="16"/>
-            <circle class="b3" cx="150" cy="73" r="14"/>
-          </g>
           <path class="sack-frill" d="M66 112 C52 84 84 66 94 92 C102 62 138 62 146 92 C156 68 188 84 174 112 Z"/>
           <path class="sack-body" d="M68 112 C26 154 14 214 50 244 C84 266 156 266 190 244 C226 214 214 154 172 112 Z"/>
           <path class="sack-shine" d="M60 168 C56 196 66 222 86 238 C70 214 66 192 76 160 Z"/>
@@ -38,10 +31,11 @@
         </svg>
         <div class="burst" id="burst"></div>
       </div>
-      <p class="status" id="status">Ryst posen for at trække det første nummer</p>
+      <p class="status" id="status">Ryst posen og træk det første nummer</p>
 
       <div class="actions">
-        <button id="drawBtn" class="draw">Ryst posen!</button>
+        <button id="shakeBtn" class="shake">Ryst posen!</button>
+        <button id="drawBtn" class="draw">Træk nummer</button>
         <button id="bankoBtn" class="banko">BANKO!</button>
       </div>
       <fieldset class="prize">

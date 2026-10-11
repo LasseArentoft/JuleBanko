@@ -7,7 +7,9 @@
   const numberEl = $("number");
   const baubleEl = $("bauble");
   const hangerEl = $("hanger");
+  const shakeBtn = $("shakeBtn");
   const SHAKE_MS = 1100; // hvor længe posen ryster
+  const PULL_MS = 800; // hvor længe kuglen er om at komme op af posen
   const statusEl = $("status");
   const drawBtn = $("drawBtn");
   const undoBtn = $("undoBtn");
@@ -89,6 +91,7 @@
 
     const done = drawn.length >= MAX;
     drawBtn.disabled = busy || done;
+    shakeBtn.disabled = busy || done;
     bankoBtn.disabled = busy || drawn.length === 0;
     undoBtn.disabled = busy || drawn.length === 0;
     resetBtn.disabled = busy || drawn.length === 0;
@@ -106,7 +109,26 @@
     return "Nummer " + n + " – " + (MAX - count) + " tilbage";
   }
 
-  // ---------- Drawing ----------
+  // ---------- Posen: ryst og træk ----------
+  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function shake() {
+    if (busy || drawn.length >= MAX) return;
+    busy = true;
+    render();
+    statusEl.textContent = "Ryst, ryst, ryst…";
+    hangerEl.classList.add("shaking");
+    const duration = reduceMotion() ? 300 : SHAKE_MS;
+    playRattle(duration);
+
+    setTimeout(() => {
+      hangerEl.classList.remove("shaking");
+      busy = false;
+      statusEl.textContent = "Posen er rystet – træk et nummer";
+      render();
+    }, duration);
+  }
+
   function draw() {
     if (busy || drawn.length >= MAX) return;
     busy = true;
@@ -116,20 +138,19 @@
     for (let n = 1; n <= MAX; n++) if (!drawn.includes(n)) remaining.push(n);
     const pick = remaining[Math.floor(Math.random() * remaining.length)];
 
-    statusEl.textContent = "Ryst, ryst, ryst…";
+    statusEl.textContent = "Her kommer det…";
+    numberEl.textContent = pick; // kuglen er skjult bag posen, mens den stiger op
+    hangerEl.classList.add("pulling");
     baubleEl.classList.remove("emerge");
-    hangerEl.classList.add("drawing");
+    void baubleEl.offsetWidth; // genstart animationen
+    baubleEl.classList.add("emerge");
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduce ? 300 : SHAKE_MS;
-    playRattle(duration);
+    const duration = reduceMotion() ? 200 : PULL_MS;
+    playRattle(Math.min(300, duration));
+    setTimeout(playPlop, duration * 0.45);
 
     setTimeout(() => {
-      hangerEl.classList.remove("drawing");
-      void baubleEl.offsetWidth; // restart animation
-      baubleEl.classList.add("emerge");
-      playPlop();
-
+      hangerEl.classList.remove("pulling");
       drawn.push(pick);
       save();
       busy = false;
@@ -153,7 +174,7 @@
     if (!confirm("Start forfra? Alle trukne numre bliver nulstillet.")) return;
     drawn = [];
     save();
-    statusEl.textContent = "Ryst posen for at trække det første nummer";
+    statusEl.textContent = "Ryst posen og træk det første nummer";
     render();
   }
 
@@ -537,6 +558,7 @@
 
   // ---------- Events ----------
   drawBtn.addEventListener("click", draw);
+  shakeBtn.addEventListener("click", shake);
   undoBtn.addEventListener("click", undo);
   resetBtn.addEventListener("click", reset);
   bankoBtn.addEventListener("click", openCheck);
