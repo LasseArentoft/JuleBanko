@@ -5,11 +5,11 @@
 
   const $ = (id) => document.getElementById(id);
   const numberEl = $("number");
-  const baubleEl = $("bauble");
+  const tagEl = $("tag");
   const hangerEl = $("hanger");
   const shakeBtn = $("shakeBtn");
   const SHAKE_MS = 1100; // hvor længe posen ryster
-  const PULL_MS = 800; // hvor længe kuglen er om at komme op af posen
+  const PULL_MS = 900; // hvor længe mærket er om at komme op af posen
   const statusEl = $("status");
   const drawBtn = $("drawBtn");
   const undoBtn = $("undoBtn");
@@ -139,11 +139,13 @@
     const pick = remaining[Math.floor(Math.random() * remaining.length)];
 
     statusEl.textContent = "Her kommer det…";
-    numberEl.textContent = pick; // kuglen er skjult bag posen, mens den stiger op
+    numberEl.textContent = pick; // mærket er skjult bag posen, mens det stiger op
+    tagEl.style.setProperty("--tilt", (Math.random() * 10 - 5).toFixed(1) + "deg");
     hangerEl.classList.add("pulling");
-    baubleEl.classList.remove("emerge");
-    void baubleEl.offsetWidth; // genstart animationen
-    baubleEl.classList.add("emerge");
+    tagEl.classList.remove("emerge");
+    void tagEl.offsetWidth; // genstart animationen
+    tagEl.classList.add("emerge");
+    sparkleAt(92, 16); // glimt fra posens åbning
 
     const duration = reduceMotion() ? 200 : PULL_MS;
     playRattle(Math.min(300, duration));
@@ -151,6 +153,7 @@
 
     setTimeout(() => {
       hangerEl.classList.remove("pulling");
+      tagEl.classList.remove("emerge");
       drawn.push(pick);
       save();
       busy = false;
@@ -524,13 +527,19 @@
 
   // ---------- Sparkles ----------
   function sparkle() {
+    sparkleAt(0, 22);
+  }
+
+  // Gnister fra et punkt (yOffset = pixels under mærkets midte)
+  function sparkleAt(yOffset, count) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const colors = ["#f0b94a", "#ffe19a", "#f7f3ec", "#e2475a"];
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < count; i++) {
       const s = document.createElement("span");
       s.className = "spark";
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 90 + Math.random() * 110;
+      const angle = yOffset ? rand(-Math.PI * 0.85, -Math.PI * 0.15) : Math.random() * Math.PI * 2;
+      const dist = yOffset ? rand(60, 170) : 90 + Math.random() * 110;
+      s.style.top = yOffset + "px";
       s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
       s.style.setProperty("--dy", Math.sin(angle) * dist + "px");
       s.style.background = colors[i % colors.length];
