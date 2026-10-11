@@ -39,6 +39,7 @@
       <div class="tools">
         <button id="undoBtn" class="ghost">Fortryd</button>
         <label class="toggle"><input type="checkbox" id="speakToggle"> Læs højt</label>
+        <label class="toggle"><input type="checkbox" id="soundToggle" checked> Festlyd</label>
         <button id="resetBtn" class="ghost">Start forfra</button>
       </div>
 
@@ -67,6 +68,17 @@
       </div>
     </form>
   </dialog>
+
+  <div id="celebration" class="celebration" role="alert" tabindex="0" hidden>
+    <div class="rays" aria-hidden="true"></div>
+    <div class="celeb-inner">
+      <div class="celeb-word" role="img" aria-label="Banko!">
+        <span style="--i:0">B</span><span style="--i:1">A</span><span style="--i:2">N</span><span style="--i:3">K</span><span style="--i:4">O</span><span style="--i:5">!</span>
+      </div>
+      <p class="celeb-prize" id="celebPrize"></p>
+      <p class="celeb-hint">Tryk for at lukke</p>
+    </div>
+  </div>
 
   <canvas id="confetti" aria-hidden="true"></canvas>
 

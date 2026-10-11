@@ -226,54 +226,239 @@
     if (!checkOk) return;
     dialog.close();
     statusEl.textContent = "BANKO! " + currentPrize() + " er godkendt";
-    confetti();
+    celebrate(currentPrize());
   }
 
-  // ---------- Konfetti ----------
+  // ---------- Banko-fest: konfetti, fyrværkeri og fanfare ----------
+  const celebEl = $("celebration");
+  const celebPrize = $("celebPrize");
   const confettiCanvas = $("confetti");
   const cctx = confettiCanvas.getContext("2d");
+  const soundToggle = $("soundToggle");
+  const SOUND_KEY = "julebanko-festlyd";
+  const CONFETTI_COLORS = ["#f0b94a", "#ffe19a", "#f7f3ec", "#e2475a", "#3fa37a", "#7fd6ff"];
+  const CELEBRATION_MS = 15000;
 
-  function confetti() {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let celebActive = false;
+  let celebTimer = 0;
+  let celebRAF = 0;
+  let fx = null;
+  let audioCtx = null;
+
+  const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  try { soundToggle.checked = localStorage.getItem(SOUND_KEY) !== "0"; } catch (e) {}
+  soundToggle.addEventListener("change", () => {
+    try { localStorage.setItem(SOUND_KEY, soundToggle.checked ? "1" : "0"); } catch (e) {}
+  });
+
+  // --- Lyd (syntetiseret, ingen lydfiler) ---
+  function getAudio() {
+    if (!soundToggle.checked) return null;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function tone(ac, freq, start, dur, type, vol) {
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.linearRampToValueAtTime(vol, start + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(start);
+    o.stop(start + dur + 0.05);
+  }
+
+  function playFanfare() {
+    const ac = getAudio();
+    if (!ac) return;
+    const t = ac.currentTime + 0.03;
+    // "ta-ta-ta-TAAA" + afsluttende akkord
+    [[392, 0, 0.13], [392, 0.16, 0.13], [392, 0.32, 0.13], [523.25, 0.48, 0.3], [659.25, 0.82, 0.3]]
+      .forEach(([f, d, len]) => tone(ac, f, t + d, len, "square", 0.1));
+    [523.25, 659.25, 783.99, 1046.5].forEach((f) => tone(ac, f, t + 1.16, 1.3, "sawtooth", 0.07));
+    [1046.5, 1318.5, 1568].forEach((f, i) => tone(ac, f, t + 1.2 + i * 0.1, 1.1, "triangle", 0.06));
+  }
+
+  function playPop(big) {
+    const ac = getAudio();
+    if (!ac) return;
+    const len = Math.floor(ac.sampleRate * 0.35);
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filter = ac.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = big ? 1800 : 2800;
+    const g = ac.createGain();
+    g.gain.value = big ? 0.5 : 0.28;
+    src.connect(filter).connect(g).connect(ac.destination);
+    src.start();
+  }
+
+  // --- Grafik ---
+  function sizeFx() {
     confettiCanvas.width = innerWidth;
     confettiCanvas.height = innerHeight;
-    const colors = ["#f0b94a", "#ffe19a", "#f7f3ec", "#e2475a", "#3fa37a"];
-    const pieces = Array.from({ length: 180 }, () => ({
-      x: innerWidth / 2 + (Math.random() - 0.5) * 120,
-      y: innerHeight * 0.55,
-      vx: (Math.random() - 0.5) * 16,
-      vy: -8 - Math.random() * 12,
-      w: 6 + Math.random() * 7,
-      h: 4 + Math.random() * 5,
-      rot: Math.random() * Math.PI,
-      vr: (Math.random() - 0.5) * 0.4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-    }));
-    const start = performance.now();
+  }
 
-    function frame(now) {
-      const elapsed = now - start;
-      cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      let alive = false;
-      for (const p of pieces) {
+  function confettiPiece(x, y, vx, vy) {
+    return {
+      kind: "confetti", x, y, vx, vy,
+      w: rand(6, 13), h: rand(4, 9),
+      rot: rand(0, Math.PI), vr: rand(-0.35, 0.35),
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    };
+  }
+
+  function cannon(side) {
+    const W = confettiCanvas.width, H = confettiCanvas.height;
+    for (let i = 0; i < 110; i++) {
+      const a = side < 0 ? rand(-80, -35) : rand(-145, -100);
+      const rad = (a * Math.PI) / 180;
+      const sp = rand(14, 30) * (H / 900 + 0.5) / 1.5;
+      fx.parts.push(confettiPiece(side < 0 ? 0 : W, H, Math.cos(rad) * sp, Math.sin(rad) * sp));
+    }
+  }
+
+  function launchRocket() {
+    const W = confettiCanvas.width, H = confettiCanvas.height;
+    const targetY = rand(H * 0.12, H * 0.42);
+    fx.parts.push({
+      kind: "rocket", x: rand(W * 0.12, W * 0.88), y: H + 10,
+      vx: rand(-1.2, 1.2), vy: -Math.sqrt(2 * 0.25 * (H - targetY)),
+      hue: Math.floor(rand(0, 360)),
+    });
+  }
+
+  function explode(r) {
+    const n = 110;
+    const hue2 = (r.hue + 40) % 360;
+    for (let i = 0; i < n; i++) {
+      const a = rand(0, Math.PI * 2);
+      const sp = Math.sqrt(Math.random()) * 9.5;
+      fx.parts.push({
+        kind: "spark", x: r.x, y: r.y,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        life: 1, decay: rand(0.009, 0.019),
+        hue: i % 3 === 0 ? hue2 : r.hue, size: rand(1.5, 3.2),
+      });
+    }
+    // lille guldregn ovenpå
+    for (let i = 0; i < 18; i++) {
+      fx.parts.push({
+        kind: "spark", x: r.x, y: r.y,
+        vx: rand(-3, 3), vy: rand(-3, 3),
+        life: 1, decay: rand(0.006, 0.01), hue: 42, size: 2.4,
+      });
+    }
+    playPop(false);
+  }
+
+  function frame(now) {
+    if (!celebActive) return;
+    const W = confettiCanvas.width, H = confettiCanvas.height;
+    const t = now - fx.start;
+
+    if (t - fx.lastCannon > 1800) { cannon(-1); cannon(1); fx.lastCannon = t; }
+    if (t - fx.lastRocket > 380 && t < CELEBRATION_MS - 2500) { launchRocket(); fx.lastRocket = t; }
+    if (t < CELEBRATION_MS - 2500) {
+      for (let i = 0; i < 3; i++) fx.parts.push(confettiPiece(rand(0, W), -12, rand(-1.5, 1.5), rand(2, 5)));
+    }
+
+    cctx.clearRect(0, 0, W, H);
+    const next = [];
+    for (const p of fx.parts) {
+      if (p.kind === "confetti") {
         p.vy += 0.35;
-        p.vx *= 0.99;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
         p.x += p.vx;
         p.y += p.vy;
         p.rot += p.vr;
-        if (p.y < confettiCanvas.height + 20) alive = true;
+        if (p.y > H + 30) continue;
         cctx.save();
         cctx.translate(p.x, p.y);
         cctx.rotate(p.rot);
         cctx.fillStyle = p.color;
-        cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        cctx.fillRect(-p.w / 2, (-p.h / 2) * Math.cos(p.rot * 2), p.w, p.h);
         cctx.restore();
+        next.push(p);
+      } else if (p.kind === "rocket") {
+        p.vy += 0.25;
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.vy >= -0.5) { explode(p); continue; }
+        cctx.fillStyle = "hsl(" + p.hue + ",100%,80%)";
+        cctx.beginPath();
+        cctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        cctx.fill();
+        fx.parts.push({ kind: "spark", x: p.x, y: p.y, vx: rand(-0.3, 0.3), vy: rand(0.5, 1.5), life: 0.55, decay: 0.03, hue: 40, size: 1.6 });
+        next.push(p);
+      } else {
+        p.vx *= 0.985;
+        p.vy = p.vy * 0.985 + 0.07;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+        if (p.life <= 0) continue;
+        cctx.globalAlpha = Math.max(p.life, 0);
+        cctx.fillStyle = "hsl(" + p.hue + ",100%," + (55 + p.life * 25) + "%)";
+        cctx.beginPath();
+        cctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        cctx.fill();
+        cctx.globalAlpha = 1;
+        next.push(p);
       }
-      if (alive && elapsed < 6000) requestAnimationFrame(frame);
-      else cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
     }
-    requestAnimationFrame(frame);
+    fx.parts = next;
+    celebRAF = requestAnimationFrame(frame);
   }
+
+  function celebrate(prize) {
+    clearTimeout(celebTimer);
+    cancelAnimationFrame(celebRAF);
+    celebPrize.textContent = prize;
+    celebEl.hidden = false;
+    celebActive = true;
+    celebEl.focus();
+    playFanfare();
+    speak("Banko på " + prize.toLowerCase());
+    celebTimer = setTimeout(stopCelebration, CELEBRATION_MS);
+
+    if (!reducedMotion()) {
+      sizeFx();
+      fx = { parts: [], start: performance.now(), lastCannon: 0, lastRocket: 0 };
+      cannon(-1);
+      cannon(1);
+      celebRAF = requestAnimationFrame(frame);
+    }
+  }
+
+  function stopCelebration() {
+    if (!celebActive) return;
+    celebActive = false;
+    clearTimeout(celebTimer);
+    cancelAnimationFrame(celebRAF);
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    fx = null;
+    celebEl.hidden = true;
+    bankoBtn.focus();
+  }
+
+  celebEl.addEventListener("click", stopCelebration);
+  addEventListener("resize", () => { if (celebActive) sizeFx(); });
 
   // ---------- Sparkles ----------
   function sparkle() {
@@ -317,6 +502,13 @@
   checkInput.addEventListener("input", runCheck);
   approveBtn.addEventListener("click", approve);
   document.addEventListener("keydown", (e) => {
+    if (celebActive) {
+      if (e.code === "Escape" || e.code === "Space" || e.code === "Enter") {
+        e.preventDefault();
+        stopCelebration();
+      }
+      return;
+    }
     if (dialog.open) return;
     if (e.code === "Space" && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
       e.preventDefault();

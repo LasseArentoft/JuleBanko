@@ -406,6 +406,83 @@ dialog::backdrop { background: rgba(5, 15, 11, 0.7); }
   z-index: 10;
 }
 
+/* ---------- Banko-fest ---------- */
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  text-align: center;
+  cursor: pointer;
+  background: radial-gradient(circle at 50% 45%, rgba(184, 38, 56, 0.93) 0%, rgba(110, 19, 32, 0.95) 45%, rgba(11, 34, 25, 0.97) 100%);
+  animation: celebIn 0.3s ease-out, flash 0.9s ease-out;
+}
+.celebration[hidden] { display: none; }
+
+.rays {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 220vmax;
+  height: 220vmax;
+  margin: -110vmax 0 0 -110vmax;
+  background: repeating-conic-gradient(from 0deg, rgba(240, 185, 74, 0.3) 0 8deg, transparent 8deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, transparent 38%);
+  mask-image: radial-gradient(circle, #000 0, transparent 38%);
+  animation: spin 18s linear infinite;
+}
+
+.celeb-inner { position: relative; padding: 1rem; }
+
+.celeb-word {
+  display: flex;
+  justify-content: center;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 900;
+  font-size: clamp(4.2rem, 19vw, 15rem);
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(255, 225, 154, 0.85), 0 6px 0 #a8791f, 0 14px 30px rgba(0, 0, 0, 0.45);
+  animation: slam 0.8s cubic-bezier(.2, 1.9, .4, 1) both;
+}
+.celeb-word span {
+  display: inline-block;
+  animation: hop 0.9s ease-in-out calc(0.8s + var(--i) * 0.09s) infinite;
+}
+
+.celeb-prize {
+  margin: 0.8rem 0 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(1.6rem, 6vw, 3.4rem);
+  color: var(--snow);
+  animation: rise 0.6s ease-out 0.5s both;
+}
+.celeb-hint {
+  margin: 2.2rem 0 0;
+  color: rgba(247, 243, 236, 0.65);
+  animation: rise 0.6s ease-out 1.2s both;
+}
+
+@keyframes celebIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes flash { 0% { filter: brightness(2.6); } 100% { filter: brightness(1); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slam {
+  0% { transform: scale(4) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(0.92) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes hop {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-0.12em) rotate(-4deg); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 800px) {
   main { grid-template-columns: 1fr; }
@@ -416,4 +493,5 @@ dialog::backdrop { background: rgba(5, 15, 11, 0.7); }
 @media (prefers-reduced-motion: reduce) {
   .hanger, .bauble.shuffling, .bauble.landed, .cell.latest { animation: none; }
   .spark { display: none; }
+  .celebration, .rays, .celeb-word, .celeb-word span, .celeb-prize, .celeb-hint { animation: none; }
 }
