@@ -119,7 +119,7 @@
     baubleEl.classList.add("shuffling");
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduce ? 300 : 1600;
+    const duration = reduce ? 300 : 900;
     const tick = setInterval(() => {
       numberEl.textContent = 1 + Math.floor(Math.random() * MAX);
     }, 70);
