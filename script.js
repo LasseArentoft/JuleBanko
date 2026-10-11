@@ -5,11 +5,11 @@
 
   const $ = (id) => document.getElementById(id);
   const numberEl = $("number");
-  const tagEl = $("tag");
+  const revealEl = $("reveal");
   const hangerEl = $("hanger");
   const shakeBtn = $("shakeBtn");
   const SHAKE_MS = 1100; // hvor længe posen ryster
-  const PULL_MS = 900; // hvor længe mærket er om at komme op af posen
+  const PULL_MS = 900; // hvor længe tallet er om at komme op af posen
   const statusEl = $("status");
   const drawBtn = $("drawBtn");
   const undoBtn = $("undoBtn");
@@ -139,13 +139,13 @@
     const pick = remaining[Math.floor(Math.random() * remaining.length)];
 
     statusEl.textContent = "Her kommer det…";
-    numberEl.textContent = pick; // mærket er skjult bag posen, mens det stiger op
-    tagEl.style.setProperty("--tilt", (Math.random() * 10 - 5).toFixed(1) + "deg");
+    numberEl.textContent = pick; // tallet er skjult bag posen, mens det stiger op
+    revealEl.style.setProperty("--tilt", (Math.random() * 8 - 4).toFixed(1) + "deg");
     hangerEl.classList.add("pulling");
-    tagEl.classList.remove("emerge");
-    void tagEl.offsetWidth; // genstart animationen
-    tagEl.classList.add("emerge");
-    sparkleAt(92, 16); // glimt fra posens åbning
+    revealEl.classList.remove("emerge");
+    void revealEl.offsetWidth; // genstart animationen
+    revealEl.classList.add("emerge");
+    sparkleAt(105, 18); // glimt fra posens åbning
 
     const duration = reduceMotion() ? 200 : PULL_MS;
     playRattle(Math.min(300, duration));
@@ -153,7 +153,7 @@
 
     setTimeout(() => {
       hangerEl.classList.remove("pulling");
-      tagEl.classList.remove("emerge");
+      revealEl.classList.remove("emerge");
       drawn.push(pick);
       save();
       busy = false;
@@ -530,7 +530,7 @@
     sparkleAt(0, 22);
   }
 
-  // Gnister fra et punkt (yOffset = pixels under mærkets midte)
+  // Gnister fra et punkt (yOffset = pixels under tallets midte)
   function sparkleAt(yOffset, count) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const colors = ["#f0b94a", "#ffe19a", "#f7f3ec", "#e2475a"];
