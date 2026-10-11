@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Julebanko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="snow" aria-hidden="true"></canvas>
+
+  <main>
+    <h1>Julebanko</h1>
+
+    <section class="stage" aria-label="Seneste nummer">
+      <div class="hanger" id="hanger">
+        <div class="string"></div>
+        <div class="cap"></div>
+        <div class="bauble" id="bauble">
+          <span id="number" aria-live="polite">?</span>
+        </div>
+        <div class="burst" id="burst"></div>
+      </div>
+      <p class="status" id="status">Tryk for at trække det første nummer</p>
+
+      <button id="drawBtn" class="draw">Træk nummer</button>
+
+      <div class="tools">
+        <button id="undoBtn" class="ghost">Fortryd</button>
+        <label class="toggle"><input type="checkbox" id="speakToggle"> Læs højt</label>
+        <button id="resetBtn" class="ghost">Start forfra</button>
+      </div>
+
+      <div class="recent">
+        <h2>Seneste fem</h2>
+        <ol id="recent"></ol>
+      </div>
+    </section>
+
+    <section class="board-wrap" aria-label="Trukne numre">
+      <h2>Trukket: <span id="count">0</span> af 90</h2>
+      <div class="board" id="board"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
