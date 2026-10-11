@@ -80,11 +80,51 @@
   }
 
   // ------------------------------------------------------------- Lydklip i RAM
-  const clips = new Map(); // key -> { url, buf }
-  function setClip(key, buf) {
+  const clips = new Map();     // de klip, der bruges: key -> { url, buf, src }
+  const localBufs = new Map(); // optaget i denne browser (har forrang)
+  const siteBufs = new Map();  // følger med siden (mappen stemme/)
+
+  function refreshClip(key) {
     const old = clips.get(key);
     if (old) URL.revokeObjectURL(old.url);
-    clips.set(key, { buf, url: URL.createObjectURL(new Blob([buf], { type: "audio/wav" })) });
+    const buf = localBufs.get(key) || siteBufs.get(key);
+    if (!buf) { clips.delete(key); return; }
+    clips.set(key, {
+      buf,
+      src: localBufs.has(key) ? "local" : "site",
+      url: URL.createObjectURL(new Blob([buf], { type: "audio/wav" })),
+    });
+  }
+  function setLocal(key, buf) { localBufs.set(key, buf); refreshClip(key); }
+  function setSite(key, buf) { siteBufs.set(key, buf); refreshClip(key); }
+
+  // Optagelser, der ligger sammen med siden: stemme/index.json + stemme/n1.wav ... banko.wav
+  const isWav = (buf) => {
+    if (!buf || buf.byteLength < 44) return false;
+    const h = new Uint8Array(buf, 0, 4);
+    return String.fromCharCode(h[0], h[1], h[2], h[3]) === "RIFF";
+  };
+  async function loadSiteClips() {
+    try {
+      const r = await fetch("stemme/index.json", { cache: "no-cache" });
+      if (!r.ok) return;
+      const list = await r.json();
+      const keys = (Array.isArray(list) ? list : (list && list.keys) || []).filter((k) => KEYS.includes(k));
+      let i = 0;
+      const worker = async () => {
+        while (i < keys.length) {
+          const key = keys[i++];
+          try {
+            const rr = await fetch("stemme/" + key + ".wav", { cache: "no-cache" });
+            if (!rr.ok) continue;
+            const buf = await rr.arrayBuffer();
+            if (isWav(buf)) setSite(key, buf);
+          } catch (e) { /* spring over */ }
+        }
+      };
+      await Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]);
+      refreshGrid();
+    } catch (e) { /* ingen optagelser på siden – fint */ }
   }
 
   let currentAudio = null;
@@ -226,9 +266,11 @@
       chipEls[key].classList.toggle("active", key === target);
       if (has) done++;
     });
-    recCount.textContent = done + " af " + KEYS.length + " optaget";
-    recDelete.disabled = done === 0;
-    recExport.disabled = done === 0;
+    const onSite = KEYS.filter((k) => clips.has(k) && clips.get(k).src === "site").length;
+    recCount.textContent = done + " af " + KEYS.length + " optaget" +
+      (onSite ? " (" + onSite + " følger med siden)" : "");
+    recDelete.disabled = localBufs.size === 0;
+    recExport.disabled = localBufs.size === 0;
   }
 
   function setStatus(text) { recStatus.textContent = text; }
@@ -408,7 +450,7 @@
     setStatus("Gemmer " + labelOf(key) + " …");
 
     idbPut(key, wav).then(() => {
-      setClip(key, wav);
+      setLocal(key, wav);
       const nxt = nextTarget(key);
       if (!nxt) {
         refreshGrid();
@@ -544,7 +586,7 @@
         const head = new Uint8Array(buf, 0, 4);
         if (String.fromCharCode(head[0], head[1], head[2], head[3]) !== "RIFF") continue;
         await idbPut(key, buf);
-        setClip(key, buf);
+        setLocal(key, buf);
         n++;
       }
       refreshGrid();
@@ -558,8 +600,8 @@
     if (!confirm("Slet alle dine optagelser fra denne browser?")) return;
     try {
       await idbClear();
-      clips.forEach((c) => URL.revokeObjectURL(c.url));
-      clips.clear();
+      localBufs.clear();
+      KEYS.forEach(refreshClip);
       target = null;
       updatePrompt();
       setStatus("Alle optagelser er slettet.");
@@ -570,10 +612,11 @@
 
   // ------------------------------------------------------------------ Start
   db().then(idbAll).then((all) => {
-    Object.keys(all).forEach((k) => { if (KEYS.includes(k)) setClip(k, all[k]); });
+    Object.keys(all).forEach((k) => { if (KEYS.includes(k)) setLocal(k, all[k]); });
     refreshGrid();
   }).catch(() => {
     refreshGrid();
   });
   refreshGrid();
+  loadSiteClips();
 })();
