@@ -499,7 +499,7 @@
     celebActive = true;
     celebEl.focus();
     playFanfare();
-    speak("Banko på " + prize.toLowerCase());
+    speakBanko(prize);
     celebTimer = setTimeout(stopCelebration, CELEBRATION_MS);
 
     if (!reducedMotion()) {
@@ -549,8 +549,16 @@
   }
 
   // ---------- Read aloud (Danish) ----------
+  function speakBanko(prize) {
+    if (!speakToggle.checked) return;
+    if (window.JuleVoice) { window.JuleVoice.sayBanko(prize); return; }
+    speak("Banko på " + prize.toLowerCase());
+  }
+
   function speak(n) {
-    if (!speakToggle.checked || !("speechSynthesis" in window)) return;
+    if (!speakToggle.checked) return;
+    if (window.JuleVoice) { window.JuleVoice.say(n); return; }
+    if (!("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(String(n));
     u.lang = "da-DK";
     u.rate = 0.9;
@@ -563,7 +571,6 @@
     try { localStorage.setItem(SPEAK_KEY, speakToggle.checked ? "1" : "0"); } catch (e) {}
     if (speakToggle.checked && drawn.length) speak(drawn[drawn.length - 1]);
   });
-  if (!("speechSynthesis" in window)) speakToggle.closest("label").hidden = true;
 
   // ---------- Events ----------
   drawBtn.addEventListener("click", draw);

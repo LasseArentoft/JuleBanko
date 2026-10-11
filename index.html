@@ -53,6 +53,7 @@
         <button id="undoBtn" class="ghost">Fortryd</button>
         <label class="toggle"><input type="checkbox" id="speakToggle"> Læs højt</label>
         <label class="toggle"><input type="checkbox" id="soundToggle" checked> Festlyd</label>
+        <button id="voiceBtn" class="ghost" type="button">Stemme</button>
         <button id="resetBtn" class="ghost">Start forfra</button>
       </div>
 
@@ -82,6 +83,57 @@
     </form>
   </dialog>
 
+  <dialog id="voiceDialog" class="voice" aria-labelledby="voiceTitle">
+    <form method="dialog" class="check">
+      <h2 id="voiceTitle">Stemme</h2>
+
+      <section class="voice-section">
+        <h3>Computerstemme</h3>
+        <label class="field">Stemme
+          <select id="voiceSelect"></select>
+        </label>
+        <label class="field">Tempo
+          <input type="range" id="rateRange" min="0.6" max="1.3" step="0.05" value="0.9">
+        </label>
+        <p class="hint" id="voiceNote"></p>
+        <button type="button" id="voiceTest" class="ghost">Hør et nummer</button>
+      </section>
+
+      <section class="voice-section">
+        <h3>Din egen stemme</h3>
+        <label class="toggle"><input type="checkbox" id="ownToggle"> Brug min stemme, når den er optaget</label>
+        <p class="hint">Sig tallene ét ad gangen med en lille pause imellem. Siden hører selv, når du er færdig med et tal, gemmer det og viser det næste. Optagelserne bliver kun på denne enhed og sendes ikke nogen steder hen.</p>
+
+        <div class="rec-stage">
+          <div class="rec-prompt" id="recPrompt" aria-live="polite">–</div>
+          <div class="rec-meter" aria-hidden="true"><span id="recLevel"></span></div>
+          <p class="hint" id="recStatus" aria-live="polite">Tryk på Start optagelse, og sig det tal, der står øverst.</p>
+        </div>
+
+        <div class="rec-actions">
+          <button type="button" id="recStart" class="draw small">Start optagelse</button>
+          <button type="button" id="recStop" class="draw small stop" hidden>Stop</button>
+          <button type="button" id="recSkip" class="ghost">Spring over</button>
+        </div>
+
+        <p class="rec-count" id="recCount">0 af 91 optaget</p>
+        <div class="rec-grid" id="recGrid"></div>
+        <p class="hint">Tryk på et tal for at høre det eller vælge det til en ny optagelse.</p>
+
+        <div class="rec-actions">
+          <button type="button" id="recExport" class="ghost">Gem til fil</button>
+          <button type="button" id="recImport" class="ghost">Hent fra fil</button>
+          <button type="button" id="recDelete" class="ghost">Slet alle</button>
+          <input type="file" id="recImportFile" accept="application/json,.json" hidden>
+        </div>
+      </section>
+
+      <div class="check-actions">
+        <button class="ghost" value="cancel">Luk</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="celebration" class="celebration" role="alert" tabindex="0" hidden>
     <div class="rays" aria-hidden="true"></div>
     <div class="celeb-inner">
@@ -95,6 +147,7 @@
 
   <canvas id="confetti" aria-hidden="true"></canvas>
 
+  <script src="voice.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

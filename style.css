@@ -510,6 +510,75 @@ dialog::backdrop { background: rgba(5, 15, 11, 0.7); }
   z-index: 10;
 }
 
+/* ---------- Stemme-dialog ---------- */
+dialog.voice { width: min(94vw, 580px); max-height: 92vh; overflow-y: auto; }
+.voice h3 { margin: 0 0 0.5rem; font-size: 1.1rem; color: var(--snow); }
+.voice-section { padding: 1rem 0; border-top: 1px solid rgba(247, 243, 236, 0.15); }
+.voice-section:first-of-type { margin-top: 0.6rem; }
+
+.field { display: grid; gap: 0.3rem; margin: 0.6rem 0; color: var(--muted); font-size: 0.95rem; }
+.voice select {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(247, 243, 236, 0.35);
+  background: rgba(247, 243, 236, 0.08);
+  color: var(--snow);
+  font: inherit;
+}
+.voice select option, .voice select optgroup { color: #111; }
+.voice input[type="range"] { width: 100%; accent-color: var(--gold); }
+
+.rec-stage {
+  margin: 0.8rem 0;
+  padding: 0.9rem 1rem 0.4rem;
+  border-radius: 14px;
+  background: rgba(247, 243, 236, 0.07);
+  text-align: center;
+}
+.rec-prompt {
+  min-height: 1.15em;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 900;
+  font-size: 4rem;
+  line-height: 1.1;
+  color: var(--gold);
+}
+.rec-meter {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(247, 243, 236, 0.15);
+  overflow: hidden;
+}
+.rec-meter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.06s linear;
+}
+.rec-stage .hint { margin: 0.7rem 0 0.5rem; min-height: 2.6em; }
+
+.rec-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin: 0.8rem 0; }
+.draw.small.stop { background: #e2475a; color: var(--snow); box-shadow: 0 4px 0 var(--bordeaux-dark); }
+.rec-count { margin: 0.4rem 0; font-weight: 600; color: var(--gold); }
+
+.rec-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.rec-grid button {
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(247, 243, 236, 0.3);
+  background: transparent;
+  color: rgba(247, 243, 236, 0.75);
+  font-size: 0.78rem;
+}
+.rec-grid button.done { background: var(--gold); border-color: var(--gold); color: var(--pine-deep); font-weight: 700; }
+.rec-grid button.active { outline: 3px solid #ff9aa6; outline-offset: 1px; }
+.rec-grid .banko-chip { grid-column: span 4; aspect-ratio: auto; border-radius: 999px; padding: 0.25rem 0; }
+
 /* ---------- Banko-fest ---------- */
 .celebration {
   position: fixed;
