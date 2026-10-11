@@ -210,8 +210,41 @@ button { font: inherit; cursor: pointer; }
 .banko:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 1px 0 var(--bordeaux-dark); }
 .banko:disabled { opacity: 0.45; cursor: default; }
 
-.prize { margin: 1.4rem 0 0; color: var(--muted); }
-.prize strong { color: var(--gold); }
+.prize {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  border: 0;
+}
+.prize legend {
+  float: left;
+  padding: 0;
+  margin-right: 0.3rem;
+  color: var(--muted);
+}
+.prize label { cursor: pointer; }
+.prize input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.prize span {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(247,243,236,0.35);
+}
+.prize input:checked + span {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--pine-deep);
+  font-weight: 700;
+}
+.prize input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 .tools {
   display: flex;

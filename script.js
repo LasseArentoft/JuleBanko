@@ -16,24 +16,19 @@
   const countEl = $("count");
   const burstEl = $("burst");
   const bankoBtn = $("bankoBtn");
-  const prizeEl = $("prize");
+  const prizeInputs = document.querySelectorAll('input[name="prize"]');
   const dialog = $("checkDialog");
   const checkInput = $("checkInput");
   const checkChips = $("checkChips");
   const checkResult = $("checkResult");
   const approveBtn = $("approveBtn");
 
-  // Gevinster: antal tal der skal kontrolleres (5 pr. række på en plade)
-  const PRIZES = [
-    { name: "1 række", need: 5 },
-    { name: "2 rækker", need: 10 },
-    { name: "Fuld plade", need: 15 },
-  ];
+  // Gevinst vælges manuelt af værten
+  const PRIZES = ["1 række", "Fuld plade"];
   const PRIZE_KEY = "julebanko-gevinst";
 
   let drawn = load();
   let busy = false;
-  let prizeIdx = loadPrize();
   let checkOk = false;
 
   // ---------- Storage (fails quietly if blocked) ----------
@@ -48,17 +43,17 @@
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(drawn)); } catch (e) {}
   }
-  function loadPrize() {
-    try {
-      const n = parseInt(localStorage.getItem(PRIZE_KEY), 10);
-      return n >= 0 && n <= PRIZES.length ? n : 0;
-    } catch (e) {
-      return 0;
-    }
+  function currentPrize() {
+    const sel = document.querySelector('input[name="prize"]:checked');
+    return sel ? sel.value : PRIZES[0];
   }
-  function savePrize() {
-    try { localStorage.setItem(PRIZE_KEY, String(prizeIdx)); } catch (e) {}
-  }
+  try {
+    const saved = localStorage.getItem(PRIZE_KEY);
+    prizeInputs.forEach((i) => { i.checked = i.value === saved || (!PRIZES.includes(saved) && i.value === PRIZES[0]); });
+  } catch (e) {}
+  prizeInputs.forEach((i) => i.addEventListener("change", () => {
+    try { localStorage.setItem(PRIZE_KEY, currentPrize()); } catch (e) {}
+  }));
 
   // ---------- Board ----------
   const cells = [];
@@ -89,8 +84,6 @@
       else li.className = "empty";
       recentEl.appendChild(li);
     }
-
-    prizeEl.textContent = PRIZES[prizeIdx] ? PRIZES[prizeIdx].name : "Alle gevinster er uddelt";
 
     const done = drawn.length >= MAX;
     drawBtn.disabled = busy || done;
@@ -159,9 +152,7 @@
     if (busy || !drawn.length) return;
     if (!confirm("Start forfra? Alle trukne numre bliver nulstillet.")) return;
     drawn = [];
-    prizeIdx = 0;
     save();
-    savePrize();
     statusEl.textContent = "Tryk for at trække det første nummer";
     render();
   }
@@ -179,7 +170,6 @@
 
   function runCheck() {
     const nums = parseNumbers(checkInput.value);
-    const prize = PRIZES[prizeIdx] || PRIZES[PRIZES.length - 1];
     checkChips.innerHTML = "";
     checkOk = false;
     approveBtn.hidden = true;
@@ -214,22 +204,18 @@
       checkResult.textContent = danskListe(invalid) + " er ikke et banko-nummer (1–" + MAX + ").";
     } else if (missing.length) {
       checkResult.textContent = "Ikke banko endnu – " + danskListe(missing) + " er ikke trukket.";
-    } else if (nums.length < prize.need) {
-      checkResult.textContent = "Alle tal er trukket, men " + prize.name.toLowerCase() + " kræver " + prize.need + " tal. Du har skrevet " + nums.length + ".";
     } else {
       checkOk = true;
       checkResult.classList.replace("bad", "good");
-      checkResult.textContent = "Kontrol bestået – nemmere end en lønkørsel.";
-      approveBtn.hidden = !PRIZES[prizeIdx];
+      checkResult.textContent = (nums.length === 1 ? "Tallet er trukket" : "Alle " + nums.length + " tal er trukket") +
+        " – nemmere end en lønkørsel.";
+      approveBtn.hidden = false;
     }
   }
 
   function openCheck() {
     if (busy || !drawn.length) return;
-    const prize = PRIZES[prizeIdx];
-    $("checkHint").textContent = prize
-      ? "Der spilles om " + prize.name.toLowerCase() + " (" + prize.need + " tal). Skriv tallene, adskilt af mellemrum eller komma."
-      : "Alle gevinster er uddelt, men du kan stadig kontrollere tal.";
+    $("checkTitle").textContent = "Banko på " + currentPrize().toLowerCase() + "?";
     checkInput.value = "";
     runCheck();
     dialog.showModal();
@@ -237,14 +223,9 @@
   }
 
   function approve() {
-    if (!checkOk || !PRIZES[prizeIdx]) return;
-    const won = PRIZES[prizeIdx].name;
-    prizeIdx++;
-    savePrize();
+    if (!checkOk) return;
     dialog.close();
-    statusEl.textContent = "BANKO! " + won + " er godkendt" +
-      (PRIZES[prizeIdx] ? " – nu spilles der om " + PRIZES[prizeIdx].name.toLowerCase() : " – tillykke, spillet er slut!");
-    render();
+    statusEl.textContent = "BANKO! " + currentPrize() + " er godkendt";
     confetti();
   }
 

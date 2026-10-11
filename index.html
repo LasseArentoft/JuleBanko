@@ -30,7 +30,11 @@
         <button id="drawBtn" class="draw">Træk nummer</button>
         <button id="bankoBtn" class="banko">BANKO!</button>
       </div>
-      <p class="prize">Der spilles om: <strong id="prize">1 række</strong></p>
+      <fieldset class="prize">
+        <legend>Der spilles om</legend>
+        <label><input type="radio" name="prize" value="1 række" checked><span>1 række</span></label>
+        <label><input type="radio" name="prize" value="Fuld plade"><span>Fuld plade</span></label>
+      </fieldset>
 
       <div class="tools">
         <button id="undoBtn" class="ghost">Fortryd</button>
@@ -53,13 +57,13 @@
   <dialog id="checkDialog" aria-labelledby="checkTitle">
     <form method="dialog" class="check">
       <h2 id="checkTitle">Banko! Lad os kontrollere</h2>
-      <p class="hint" id="checkHint">Skriv tallene fra rækken eller pladen, adskilt af mellemrum eller komma.</p>
+      <p class="hint" id="checkHint">Skriv så mange tal du vil, adskilt af mellemrum eller komma.</p>
       <textarea id="checkInput" rows="3" placeholder="fx 4 17 23 58 81" inputmode="numeric" aria-describedby="checkHint"></textarea>
       <ul id="checkChips" class="chips"></ul>
       <p id="checkResult" class="result" aria-live="polite"></p>
       <div class="check-actions">
         <button class="ghost" value="cancel">Luk</button>
-        <button type="button" id="approveBtn" class="draw small" hidden>Godkend banko</button>
+        <button type="button" id="approveBtn" class="draw small" hidden>Fejr banko!</button>
       </div>
     </form>
   </dialog>
