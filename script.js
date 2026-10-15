@@ -39,7 +39,9 @@
   function load() {
     try {
       const list = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return Array.isArray(list) ? list : [];
+      if (!Array.isArray(list)) return [];
+      // kun hele tal mellem 1 og MAX, og hvert tal højst én gang
+      return list.filter((n, i) => Number.isInteger(n) && n >= 1 && n <= MAX && list.indexOf(n) === i);
     } catch (e) {
       return [];
     }
@@ -129,8 +131,17 @@
     }, duration);
   }
 
+  // Regel: et nummer kan kun trækkes én gang, indtil der trykkes "Start forfra".
+  // Listen hentes friskt, hver gang der trækkes, så to åbne faner ikke kan trække det samme tal.
+  function syncDrawn() {
+    drawn = load();
+    return drawn;
+  }
+
   function draw() {
-    if (busy || drawn.length >= MAX) return;
+    if (busy) return;
+    syncDrawn();
+    if (drawn.length >= MAX) { render(); return; }
     busy = true;
     render();
 
@@ -154,6 +165,14 @@
     setTimeout(() => {
       hangerEl.classList.remove("pulling");
       revealEl.classList.remove("emerge");
+      syncDrawn();
+      if (drawn.includes(pick)) {
+        // et andet vindue nåede at trække det samme tal – det tæller ikke to gange
+        busy = false;
+        statusEl.textContent = "Det nummer var allerede trukket – træk igen";
+        render();
+        return;
+      }
       drawn.push(pick);
       save();
       busy = false;
@@ -570,6 +589,15 @@
   speakToggle.addEventListener("change", () => {
     try { localStorage.setItem(SPEAK_KEY, speakToggle.checked ? "1" : "0"); } catch (e) {}
     if (speakToggle.checked && drawn.length) speak(drawn[drawn.length - 1]);
+  });
+
+  // Hold flere åbne faner ens: når et andet vindue trækker, fortryder eller nulstiller
+  addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY || busy) return;
+    syncDrawn();
+    if (drawn.length) statusEl.textContent = statusFor(drawn.length, drawn[drawn.length - 1]);
+    else statusEl.textContent = "Ryst posen og træk det første nummer";
+    render();
   });
 
   // ---------- Events ----------
