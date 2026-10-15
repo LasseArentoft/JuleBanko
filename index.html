@@ -17,6 +17,21 @@
 
     <section class="stage" aria-label="Seneste nummer">
       <div class="hanger" id="hanger">
+        <svg class="sack-back" viewBox="0 0 240 270" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="sbInner" cx="50%" cy="35%" r="75%">
+              <stop offset="0" stop-color="#3a0f17"/><stop offset="1" stop-color="#14040a"/>
+            </radialGradient>
+            <linearGradient id="sbFur" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e3e9f2"/>
+            </linearGradient>
+          </defs>
+          <!-- bagsiden af pelskanten -->
+          <circle cx="178.8" cy="77.4" r="10.9" fill="#cfd8e6"/><circle cx="175.5" cy="73.7" r="9.1" fill="#cfd8e6"/><circle cx="168.3" cy="70.5" r="9.3" fill="#cfd8e6"/><circle cx="160.9" cy="67.0" r="11.1" fill="#cfd8e6"/><circle cx="147.8" cy="65.3" r="10.4" fill="#cfd8e6"/><circle cx="134.4" cy="63.8" r="8.8" fill="#cfd8e6"/><circle cx="120.0" cy="62.7" r="9.9" fill="#cfd8e6"/><circle cx="105.8" cy="64.1" r="11.2" fill="#cfd8e6"/><circle cx="91.7" cy="65.0" r="9.8" fill="#cfd8e6"/><circle cx="79.5" cy="67.1" r="8.9" fill="#cfd8e6"/><circle cx="71.9" cy="70.5" r="10.5" fill="#cfd8e6"/><circle cx="63.6" cy="73.6" r="11.0" fill="#cfd8e6"/><circle cx="62.1" cy="77.5" r="9.2" fill="#cfd8e6"/>
+          <circle cx="178.8" cy="75.2" r="10.9" fill="url(#sbFur)"/><circle cx="175.5" cy="71.5" r="9.1" fill="url(#sbFur)"/><circle cx="168.3" cy="68.3" r="9.3" fill="url(#sbFur)"/><circle cx="160.9" cy="64.8" r="11.1" fill="url(#sbFur)"/><circle cx="147.8" cy="63.1" r="10.4" fill="url(#sbFur)"/><circle cx="134.4" cy="61.6" r="8.8" fill="url(#sbFur)"/><circle cx="120.0" cy="60.5" r="9.9" fill="url(#sbFur)"/><circle cx="105.8" cy="61.9" r="11.2" fill="url(#sbFur)"/><circle cx="91.7" cy="62.8" r="9.8" fill="url(#sbFur)"/><circle cx="79.5" cy="64.9" r="8.9" fill="url(#sbFur)"/><circle cx="71.9" cy="68.3" r="10.5" fill="url(#sbFur)"/><circle cx="63.6" cy="71.4" r="11.0" fill="url(#sbFur)"/><circle cx="62.1" cy="75.3" r="9.2" fill="url(#sbFur)"/>
+          <!-- det mørke indre -->
+          <ellipse cx="120" cy="78" rx="55" ry="12.5" fill="url(#sbInner)"/>
+        </svg>
         <div class="reveal" id="reveal">
           <span id="number" aria-live="polite">?</span>
           <i class="twinkle t1" aria-hidden="true"></i>
@@ -27,12 +42,100 @@
         </div>
         <div class="shout" aria-hidden="true">Ryst posen!</div>
         <svg class="sack" viewBox="0 0 240 270" aria-hidden="true" focusable="false">
-          <ellipse class="sack-shadow" cx="120" cy="262" rx="82" ry="8"/>
-          <path class="sack-frill" d="M66 112 C52 84 84 66 94 92 C102 62 138 62 146 92 C156 68 188 84 174 112 Z"/>
-          <path class="sack-body" d="M68 112 C26 154 14 214 50 244 C84 266 156 266 190 244 C226 214 214 154 172 112 Z"/>
-          <path class="sack-shine" d="M60 168 C56 196 66 222 86 238 C70 214 66 192 76 160 Z"/>
-          <rect class="sack-tie" x="58" y="102" width="124" height="22" rx="11"/>
-          <text class="sack-text" x="120" y="196" text-anchor="middle" transform="rotate(-5 120 190)">BANKO</text>
+          <defs>
+            <radialGradient id="sfBody" cx="36%" cy="40%" r="78%">
+              <stop offset="0" stop-color="#e0485a"/>
+              <stop offset="0.45" stop-color="#b4263a"/>
+              <stop offset="0.85" stop-color="#7c1526"/>
+              <stop offset="1" stop-color="#5a0d1b"/>
+            </radialGradient>
+            <linearGradient id="sfSide" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#000" stop-opacity=".22"/>
+              <stop offset=".22" stop-color="#000" stop-opacity="0"/>
+              <stop offset=".72" stop-color="#000" stop-opacity="0"/>
+              <stop offset="1" stop-color="#000" stop-opacity=".34"/>
+            </linearGradient>
+            <linearGradient id="sfFur" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e1e8f2"/>
+            </linearGradient>
+            <linearGradient id="sfRope" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffe19a"/><stop offset="1" stop-color="#c8932f"/>
+            </linearGradient>
+            <linearGradient id="sfPatch" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecdfc4"/>
+            </linearGradient>
+            <linearGradient id="sfSnow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cdd8ea"/>
+            </linearGradient>
+            <clipPath id="sfClip">
+              <path d="M70 84 C44 112 12 160 16 212 C20 246 62 262 120 262 C178 262 220 246 224 212 C228 160 196 112 170 84 Z"/>
+            </clipPath>
+          </defs>
+
+          <!-- selve sækken -->
+          <path d="M70 84 C44 112 12 160 16 212 C20 246 62 262 120 262 C178 262 220 246 224 212 C228 160 196 112 170 84 Z" fill="url(#sfBody)"/>
+          <g clip-path="url(#sfClip)">
+            <rect x="0" y="70" width="240" height="200" fill="url(#sfSide)"/>
+            <!-- folder -->
+            <path d="M93 104 C80 148 74 198 90 258" fill="none" stroke="#3d0711" stroke-opacity=".28" stroke-width="7" stroke-linecap="round"/>
+            <path d="M99 106 C88 150 83 198 97 258" fill="none" stroke="#ff8a98" stroke-opacity=".12" stroke-width="4" stroke-linecap="round"/>
+            <path d="M150 104 C165 148 172 200 156 258" fill="none" stroke="#3d0711" stroke-opacity=".3" stroke-width="7" stroke-linecap="round"/>
+            <path d="M144 106 C157 150 163 198 149 258" fill="none" stroke="#ff8a98" stroke-opacity=".10" stroke-width="4" stroke-linecap="round"/>
+            <path d="M121 118 C117 164 117 214 121 258" fill="none" stroke="#3d0711" stroke-opacity=".14" stroke-width="5" stroke-linecap="round"/>
+            <!-- glans -->
+            <ellipse cx="62" cy="168" rx="15" ry="48" fill="#fff" fill-opacity=".17" transform="rotate(14 62 168)"/>
+            <ellipse cx="55" cy="150" rx="5" ry="20" fill="#fff" fill-opacity=".22" transform="rotate(16 55 150)"/>
+            <!-- bund-skygge -->
+            <ellipse cx="120" cy="268" rx="104" ry="26" fill="#2a0410" fill-opacity=".45"/>
+          </g>
+
+          <!-- lille mærke med BANKO -->
+          <g transform="rotate(-4 120 190)">
+            <rect x="57" y="162" width="126" height="50" rx="9" fill="url(#sfPatch)" stroke="#c8932f" stroke-width="2.2"/>
+            <rect x="62.5" y="167.5" width="115" height="39" rx="5.5" fill="none" stroke="#b9892a" stroke-width="1.3" stroke-dasharray="3.2 3"/>
+            <text class="sack-text" x="120" y="196.5" text-anchor="middle">BANKO</text>
+          </g>
+          <!-- kristtorn -->
+          <g transform="translate(58 167) rotate(-16)">
+            <path d="M0 0 C-4 -9 -15 -11 -21 -6 C-17 -4 -19 1 -15 3 C-13 6 -8 5 -7 8 C-3 7 0 4 0 0 Z" fill="#2f8f5f" stroke="#1d5b3b" stroke-width="1"/>
+            <path d="M3 0 C8 -9 19 -9 23 -3 C19 -2 20 3 16 4 C14 8 9 6 8 9 C4 8 2 4 3 0 Z" fill="#37a06b" stroke="#1d5b3b" stroke-width="1"/>
+            <circle cx="0" cy="3" r="4.2" fill="#e2273d"/><circle cx="-6" cy="6.5" r="3.8" fill="#c91d33"/><circle cx="6" cy="6.5" r="3.8" fill="#d7233a"/>
+            <circle cx="-1.1" cy="1.8" r="1.2" fill="#fff" fill-opacity=".8"/><circle cx="5" cy="5.4" r="1" fill="#fff" fill-opacity=".7"/>
+          </g>
+
+          <!-- snor med sløjfe -->
+          <path d="M60 92 Q120 134 180 92" fill="none" stroke="#7a5018" stroke-width="7" stroke-linecap="round" opacity=".5" transform="translate(0 1.5)"/>
+          <path d="M60 92 Q120 134 180 92" fill="none" stroke="url(#sfRope)" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M60 92 Q120 134 180 92" fill="none" stroke="#8a5d14" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="1.6 4.6" opacity=".55"/>
+          <!-- haler -->
+          <path d="M118 112 C112 124 106 134 103 146" fill="none" stroke="url(#sfRope)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M122 112 C128 125 135 135 138 148" fill="none" stroke="url(#sfRope)" stroke-width="3.6" stroke-linecap="round"/>
+          <g fill="#f0b94a" stroke="#a8791f" stroke-width=".9">
+            <rect x="99.5" y="145" width="7" height="6" rx="2.2"/><path d="M100 151v8M102.2 151v9M104.4 151v8M106.2 151v7" stroke-width="1.4" stroke-linecap="round"/>
+            <rect x="134.5" y="147" width="7" height="6" rx="2.2"/><path d="M135 153v8M137.2 153v9M139.4 153v8M141.2 153v7" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <!-- sløjfens løkker -->
+          <path d="M120 110 C100 92 88 108 102 117 C110 121 117 117 120 110 Z" fill="url(#sfRope)" stroke="#a8791f" stroke-width="1.2"/>
+          <path d="M120 110 C140 92 152 108 138 117 C130 121 123 117 120 110 Z" fill="url(#sfRope)" stroke="#a8791f" stroke-width="1.2"/>
+          <path d="M112 109 C106 105 101 108 104 112" fill="none" stroke="#fff3c4" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="120" cy="112" r="5.4" fill="url(#sfRope)" stroke="#a8791f" stroke-width="1.2"/>
+
+          <!-- pelskanten (forside) -->
+          <circle cx="61.8" cy="78.6" r="10.3" fill="#c5cfe0"/><circle cx="64.2" cy="82.0" r="11.5" fill="#c5cfe0"/><circle cx="65.8" cy="85.5" r="12.7" fill="#c5cfe0"/><circle cx="74.3" cy="88.1" r="11.2" fill="#c5cfe0"/><circle cx="83.4" cy="90.6" r="10.4" fill="#c5cfe0"/><circle cx="93.7" cy="93.0" r="12.1" fill="#c5cfe0"/><circle cx="107.1" cy="93.4" r="12.5" fill="#c5cfe0"/><circle cx="120.0" cy="94.3" r="10.7" fill="#c5cfe0"/><circle cx="133.4" cy="94.1" r="10.7" fill="#c5cfe0"/><circle cx="145.1" cy="92.2" r="12.5" fill="#c5cfe0"/><circle cx="157.6" cy="91.1" r="12.0" fill="#c5cfe0"/><circle cx="166.1" cy="88.3" r="10.4" fill="#c5cfe0"/><circle cx="172.0" cy="85.2" r="11.3" fill="#c5cfe0"/><circle cx="178.3" cy="82.1" r="12.7" fill="#c5cfe0"/><circle cx="177.1" cy="78.6" r="11.4" fill="#c5cfe0"/>
+          <circle cx="61.8" cy="75.4" r="10.3" fill="url(#sfFur)"/><circle cx="64.2" cy="78.8" r="11.5" fill="url(#sfFur)"/><circle cx="65.8" cy="82.3" r="12.7" fill="url(#sfFur)"/><circle cx="74.3" cy="84.9" r="11.2" fill="url(#sfFur)"/><circle cx="83.4" cy="87.4" r="10.4" fill="url(#sfFur)"/><circle cx="93.7" cy="89.8" r="12.1" fill="url(#sfFur)"/><circle cx="107.1" cy="90.2" r="12.5" fill="url(#sfFur)"/><circle cx="120.0" cy="91.1" r="10.7" fill="url(#sfFur)"/><circle cx="133.4" cy="90.9" r="10.7" fill="url(#sfFur)"/><circle cx="145.1" cy="89.0" r="12.5" fill="url(#sfFur)"/><circle cx="157.6" cy="87.9" r="12.0" fill="url(#sfFur)"/><circle cx="166.1" cy="85.1" r="10.4" fill="url(#sfFur)"/><circle cx="172.0" cy="82.0" r="11.3" fill="url(#sfFur)"/><circle cx="178.3" cy="78.9" r="12.7" fill="url(#sfFur)"/><circle cx="177.1" cy="75.4" r="11.4" fill="url(#sfFur)"/>
+          <path d="M0.0 0.0 l1.6 5.2 l1.6 -5.2 l-1.6 1.6 z" fill="#2a2e3a" opacity=".85" transform="translate(62.6 76.8)"/><path d="M0.0 0.0 l1.6 5.2 l1.6 -5.2 l-1.6 1.6 z" fill="#2a2e3a" opacity=".85" transform="translate(81.8 85.4)"/><path d="M0.0 0.0 l1.6 5.2 l1.6 -5.2 l-1.6 1.6 z" fill="#2a2e3a" opacity=".85" transform="translate(118.4 89.1)"/><path d="M0.0 0.0 l1.6 5.2 l1.6 -5.2 l-1.6 1.6 z" fill="#2a2e3a" opacity=".85" transform="translate(156.0 85.9)"/><path d="M0.0 0.0 l1.6 5.2 l1.6 -5.2 l-1.6 1.6 z" fill="#2a2e3a" opacity=".85" transform="translate(176.7 76.9)"/>
+        </svg>
+        <svg class="sack-snow" viewBox="0 0 240 270" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="ssSnow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9d5e9"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="120" cy="262" rx="104" ry="9" fill="rgba(0,0,0,.35)"/>
+          <path d="M6 264 C14 254 30 246 52 249 C64 240 86 245 102 249 C116 242 136 245 150 249 C168 243 190 245 206 250 C220 248 232 255 236 264 Z" fill="url(#ssSnow)"/>
+          <path d="M34 255 C46 251 58 256 70 253" fill="none" stroke="#b3c2dc" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>
+          <path d="M158 256 C172 252 186 257 200 254" fill="none" stroke="#b3c2dc" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>
+          <circle cx="92" cy="254" r="1.6" fill="#fff"/><circle cx="176" cy="252" r="1.4" fill="#fff"/><circle cx="48" cy="258" r="1.3" fill="#fff"/>
         </svg>
         <div class="burst" id="burst"></div>
       </div>
