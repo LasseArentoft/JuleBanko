@@ -649,6 +649,12 @@
   const ctx = canvas.getContext("2d");
   let flakes = [];
 
+  // Sne der lægger sig i bunden af siden
+  const STEP = 4;          // bredde pr. søjle i px
+  const BASE = 5;          // snedybde fra start
+  const MAXH = 46;         // højeste snedrive
+  let ground = [];
+
   function sizeCanvas() {
     canvas.width = innerWidth;
     canvas.height = innerHeight;
@@ -660,6 +666,39 @@
       v: 0.3 + Math.random() * 0.9,
       p: Math.random() * Math.PI * 2,
     }));
+    const cols = Math.ceil(canvas.width / STEP) + 1;
+    ground = Array.from({ length: cols }, (_, i) => BASE + 2 * Math.sin(i / 9) + 1.5 * Math.sin(i / 3.7));
+  }
+
+  function land(x, r) {
+    const c = Math.max(0, Math.min(ground.length - 1, Math.round(x / STEP)));
+    const add = 0.25 + r * 0.12;
+    // læg sneen i søjlen og lidt i naboerne, så den danner bløde driver
+    for (let k = -3; k <= 3; k++) {
+      const i = c + k;
+      if (i < 0 || i >= ground.length) continue;
+      ground[i] = Math.min(MAXH, ground[i] + add * (1 - Math.abs(k) / 4));
+    }
+    // jævn ud mod lavere naboer, så toppen ikke bliver takket
+    for (let k = -4; k <= 4; k++) {
+      const i = c + k;
+      if (i < 1 || i >= ground.length - 1) continue;
+      ground[i] += ((ground[i - 1] + ground[i + 1]) / 2 - ground[i]) * 0.3;
+    }
+  }
+
+  function drawGround() {
+    const H = canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let i = 0; i < ground.length; i++) ctx.lineTo(i * STEP, H - ground[i]);
+    ctx.lineTo(canvas.width + STEP, H);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(0, H - MAXH, 0, H);
+    g.addColorStop(0, "rgba(255,255,255,0.95)");
+    g.addColorStop(1, "rgba(214,228,236,0.95)");
+    ctx.fillStyle = g;
+    ctx.fill();
   }
 
   function snow() {
@@ -669,17 +708,23 @@
       f.y += f.v;
       f.p += 0.01;
       f.x += Math.sin(f.p) * 0.4;
-      if (f.y > canvas.height + 5) { f.y = -5; f.x = Math.random() * canvas.width; }
+      const col = Math.max(0, Math.min(ground.length - 1, Math.round(f.x / STEP)));
+      if (f.y + f.r >= canvas.height - ground[col]) {
+        land(f.x, f.r);
+        f.y = -5; f.x = Math.random() * canvas.width;
+      } else if (f.y > canvas.height + 5) { f.y = -5; f.x = Math.random() * canvas.width; }
       ctx.beginPath();
       ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
       ctx.fill();
     }
+    drawGround();
     requestAnimationFrame(snow);
   }
 
   sizeCanvas();
   addEventListener("resize", sizeCanvas);
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) snow();
+  else drawGround();
 
   // ---------- Start ----------
   if (drawn.length) statusEl.textContent = statusFor(drawn.length, drawn[drawn.length - 1]);
