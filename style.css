@@ -579,6 +579,54 @@ dialog.voice { width: min(94vw, 580px); max-height: 92vh; overflow-y: auto; }
 .rec-grid button.active { outline: 3px solid #ff9aa6; outline-offset: 1px; }
 .rec-grid .banko-chip { grid-column: span 4; aspect-ratio: auto; border-radius: 999px; padding: 0.25rem 0; }
 
+/* ---------- Udtryk under nummeret ---------- */
+.nick-wrap {
+  min-height: 3.1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 100%;
+  padding: 0.5rem 1.1rem 0.5rem 0.85rem;
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  background: rgba(240, 185, 74, 0.14);
+  color: var(--gold);
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  text-align: left;
+  animation: nickin 0.45s cubic-bezier(.2, 1.5, .4, 1);
+}
+.nick[hidden] { display: none; }
+.nick svg { flex: none; width: 1.3em; height: 1.3em; fill: currentColor; }
+.nick:hover { background: rgba(240, 185, 74, 0.28); }
+.nick:active { transform: translateY(2px); }
+@keyframes nickin {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to { opacity: 1; transform: none; }
+}
+
+.nick-section { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(247, 243, 236, 0.15); }
+.nick-section[hidden] { display: none; }
+.nick-section .rec-grid.nick-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.rec-grid .nick-chip {
+  aspect-ratio: auto;
+  border-radius: 14px;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+.rec-grid .nick-chip b { margin-right: 0.15rem; }
+.rec-prompt.long { font-size: 2.2rem; line-height: 1.15; padding: 0.4rem 0; }
+
 /* ---------- Banko-fest ---------- */
 .celebration {
   position: fixed;
@@ -667,5 +715,5 @@ dialog.voice { width: min(94vw, 580px); max-height: 92vh; overflow-y: auto; }
   .cell.latest { animation: none; }
   .spark { display: none; }
   .celebration, .rays, .celeb-word, .celeb-word span, .celeb-prize, .celeb-hint { animation: none; }
-  .reveal.emerge, .reveal.emerge #number, .reveal.emerge::before, .twinkle, .hanger.shaking .reveal, .hanger.shaking .sack, .hanger.pulling .sack, .hanger.shaking .shout { animation: none; }
+  .nick, .reveal.emerge, .reveal.emerge #number, .reveal.emerge::before, .twinkle, .hanger.shaking .reveal, .hanger.shaking .sack, .hanger.pulling .sack, .hanger.shaking .shout { animation: none; }
 }

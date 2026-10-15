@@ -36,6 +36,12 @@
         </svg>
         <div class="burst" id="burst"></div>
       </div>
+      <div class="nick-wrap">
+        <button type="button" id="nickBtn" class="nick" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+          <span id="nickText"></span>
+        </button>
+      </div>
       <p class="status" id="status">Ryst posen og træk det første nummer</p>
 
       <div class="actions">
@@ -120,6 +126,13 @@
         <div class="rec-grid" id="recGrid"></div>
         <p class="hint">Tryk på et tal for at høre det eller vælge det til en ny optagelse.</p>
 
+        <div class="nick-section">
+          <h3>Udtryk</h3>
+          <p class="hint">Efter tallene og "Banko!" kommer udtrykkene (fx "Gamle Ole" til 90). Sig kun udtrykket, ikke tallet.</p>
+          <p class="rec-count" id="nickCount">0 af 24 udtryk optaget</p>
+          <div class="rec-grid nick-grid" id="nickGrid"></div>
+        </div>
+
         <div class="rec-actions">
           <button type="button" id="recExport" class="ghost">Gem til fil</button>
           <button type="button" id="recImport" class="ghost">Hent fra fil</button>
@@ -147,6 +160,7 @@
 
   <canvas id="confetti" aria-hidden="true"></canvas>
 
+  <script src="udtryk.js"></script>
   <script src="voice.js"></script>
   <script src="script.js"></script>
 </body>

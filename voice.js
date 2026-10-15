@@ -1,16 +1,23 @@
 /*
  * Stemme til Julebanko
  * - vælg og tun computerstemmen
- * - optag din egen stemme (1-90 + "Banko!"). Optagelserne gemmes kun i denne browser
- *   (IndexedDB) og sendes aldrig nogen steder hen.
- * Eksponerer window.JuleVoice.say(n) og window.JuleVoice.sayBanko(gevinst).
+ * - optag din egen stemme (1-90, "Banko!" og udtrykkene fra udtryk.js). Optagelserne gemmes kun
+ *   i denne browser (IndexedDB) og sendes aldrig nogen steder hen.
+ * Eksponerer window.JuleVoice.say(n), .sayBanko(gevinst) og .sayNick(n).
  */
 (() => {
   "use strict";
 
   const MAX = 90;
-  const KEYS = Array.from({ length: MAX }, (_, i) => "n" + (i + 1)).concat(["banko"]);
-  const labelOf = (k) => (k === "banko" ? "Banko!" : k.slice(1));
+  const NICKS = window.JULE_NICKS || {};
+  const NICK_NUMBERS = Object.keys(NICKS).map(Number).filter((n) => n >= 1 && n <= MAX).sort((a, b) => a - b);
+  const NUM_KEYS = Array.from({ length: MAX }, (_, i) => "n" + (i + 1)).concat(["banko"]);
+  const NICK_KEYS = NICK_NUMBERS.map((n) => "u" + n); // u90 = udtrykket til nummer 90
+  const KEYS = NUM_KEYS.concat(NICK_KEYS);
+  const isNick = (k) => k.charAt(0) === "u";
+  const labelOf = (k) => (k === "banko" ? "Banko!" : isNick(k) ? NICKS[k.slice(1)] : k.slice(1));
+  // Det, der står i vejledningen, mens man optager
+  const sayLabel = (k) => (isNick(k) ? NICKS[k.slice(1)] + " (udtryk til nummer " + k.slice(1) + ")" : labelOf(k));
 
   const PREF = { voice: "julebanko-stemme-valg", rate: "julebanko-stemme-tempo", own: "julebanko-egen-stemme" };
   const store = {
@@ -36,6 +43,8 @@
   const recStop = $("recStop");
   const recSkip = $("recSkip");
   const recGrid = $("recGrid");
+  const nickGrid = $("nickGrid");
+  const nickCount = $("nickCount");
   const recExport = $("recExport");
   const recImport = $("recImport");
   const recImportFile = $("recImportFile");
@@ -229,7 +238,22 @@
     }
   }
 
-  window.JuleVoice = { say, sayBanko };
+  // Udtrykket til et nummer (fx 90: "Gamle Ole"). Spørger man efter et nummer uden udtryk, sker der intet.
+  function sayNick(n) {
+    const text = NICKS[n];
+    if (!text) return;
+    const key = "u" + n;
+    stopAudio();
+    if (ownOn() && clips.has(key)) {
+      playClip(key).then((ok) => { if (!ok) tts(spoken(text)); });
+    } else {
+      tts(spoken(text));
+    }
+  }
+  // Ord med store bogstaver (HURRA) læses nogle steder bogstav for bogstav – gør dem til normal skrift
+  const spoken = (t) => t.replace(/[A-ZÆØÅ]{2,}/g, (w) => w.charAt(0) + w.slice(1).toLowerCase());
+
+  window.JuleVoice = { say, sayBanko, sayNick, hasNick: (n) => Boolean(NICKS[n]) };
 
   // ------------------------------------------------------------------ Dialog / UI
   voiceBtn.addEventListener("click", () => {
@@ -245,30 +269,41 @@
   KEYS.forEach((key) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.textContent = labelOf(key);
-    b.className = key === "banko" ? "banko-chip" : "";
-    b.setAttribute("aria-label", key === "banko" ? "Banko" : "Nummer " + labelOf(key));
+    if (isNick(key)) {
+      const num = document.createElement("b");
+      num.textContent = key.slice(1);
+      b.append(num, document.createTextNode(" " + labelOf(key)));
+      b.className = "nick-chip";
+      b.setAttribute("aria-label", "Udtryk til nummer " + key.slice(1) + ": " + labelOf(key));
+    } else {
+      b.textContent = labelOf(key);
+      b.className = key === "banko" ? "banko-chip" : "";
+      b.setAttribute("aria-label", key === "banko" ? "Banko" : "Nummer " + labelOf(key));
+    }
     b.addEventListener("click", () => {
       target = key;
       updatePrompt();
       if (clips.has(key)) playClip(key);
-      if (recording) { setStatus("Sig: " + labelOf(key)); }
+      if (recording) { setStatus("Sig: " + sayLabel(key)); }
     });
-    recGrid.appendChild(b);
+    (isNick(key) ? nickGrid : recGrid).appendChild(b);
     chipEls[key] = b;
   });
+  if (!NICK_KEYS.length) {
+    const sec = nickGrid.closest(".nick-section");
+    if (sec) sec.hidden = true;
+  }
 
   function refreshGrid() {
-    let done = 0;
     KEYS.forEach((key) => {
-      const has = clips.has(key);
-      chipEls[key].classList.toggle("done", has);
+      chipEls[key].classList.toggle("done", clips.has(key));
       chipEls[key].classList.toggle("active", key === target);
-      if (has) done++;
     });
+    const count = (list) => list.filter((k) => clips.has(k)).length;
     const onSite = KEYS.filter((k) => clips.has(k) && clips.get(k).src === "site").length;
-    recCount.textContent = done + " af " + KEYS.length + " optaget" +
+    recCount.textContent = count(NUM_KEYS) + " af " + NUM_KEYS.length + " tal optaget" +
       (onSite ? " (" + onSite + " følger med siden)" : "");
+    nickCount.textContent = count(NICK_KEYS) + " af " + NICK_KEYS.length + " udtryk optaget";
     recDelete.disabled = localBufs.size === 0;
     recExport.disabled = localBufs.size === 0;
   }
@@ -276,7 +311,9 @@
   function setStatus(text) { recStatus.textContent = text; }
 
   function updatePrompt() {
-    recPrompt.textContent = target ? labelOf(target) : "–";
+    const text = target ? labelOf(target) : "–";
+    recPrompt.textContent = text;
+    recPrompt.classList.toggle("long", text.length > 6);
     refreshGrid();
   }
 
@@ -386,7 +423,7 @@
         const noise = calSum / Math.max(1, calMs / chunkMs);
         threshold = Math.max(0.02, noise * 4);
         state = "idle";
-        setStatus("Sig: " + labelOf(target));
+        setStatus("Sig: " + sayLabel(target));
       }
       return;
     }
@@ -456,12 +493,12 @@
         refreshGrid();
         target = key;
         stopRecording();
-        setStatus("Færdig! Alle numre er optaget. Tryk på et tal for at høre det eller optage det igen.");
+        setStatus("Færdig! Alt er optaget. Tryk på et tal eller udtryk for at høre det eller optage det igen.");
         return;
       }
       target = nxt;
       updatePrompt();
-      setStatus("✓ " + labelOf(key) + " gemt. Næste: " + labelOf(nxt));
+      setStatus("✓ " + labelOf(key) + " gemt. Næste: " + sayLabel(nxt));
     }).catch(() => {
       setStatus("Kunne ikke gemme optagelsen i browseren.");
     });
@@ -535,7 +572,7 @@
   recSkip.addEventListener("click", () => {
     if (!target) return;
     const nxt = nextTarget(target);
-    if (nxt) { target = nxt; updatePrompt(); if (recording) setStatus("Sig: " + labelOf(target)); }
+    if (nxt) { target = nxt; updatePrompt(); if (recording) setStatus("Sig: " + sayLabel(target)); }
   });
 
   // ---------------------------------------------------- Gem / hent / slet optagelser

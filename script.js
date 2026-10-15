@@ -8,6 +8,9 @@
   const revealEl = $("reveal");
   const hangerEl = $("hanger");
   const shakeBtn = $("shakeBtn");
+  const nickBtn = $("nickBtn");
+  const nickText = $("nickText");
+  const NICKS = window.JULE_NICKS || {};
   const SHAKE_MS = 1100; // hvor længe posen ryster
   const PULL_MS = 900; // hvor længe tallet er om at komme op af posen
   const statusEl = $("status");
@@ -82,6 +85,14 @@
     countEl.textContent = drawn.length;
     numberEl.textContent = latest ?? "?";
 
+    // udtrykket til det seneste nummer – først når tallet er landet
+    const nick = !busy && latest !== undefined ? NICKS[latest] : null;
+    nickBtn.hidden = !nick;
+    if (nick) {
+      nickText.textContent = nick;
+      nickBtn.setAttribute("aria-label", "Sig udtrykket: " + nick);
+    }
+
     recentEl.innerHTML = "";
     const last5 = drawn.slice(-5).reverse();
     for (let i = 0; i < 5; i++) {
@@ -105,8 +116,7 @@
     if (count === 1) return "Første nummer er " + n;
     if (count === 45) return "Halvvejs – 45 numre er trukket";
     if (count === 80) return "Kun ti numre tilbage";
-    if (n === 24) return "Juleaften! Nummer 24";
-    if (n === 11 || n === 22 || n === 33 || n === 44 || n === 55 || n === 66 || n === 77 || n === 88)
+    if (!NICKS[n] && (n === 11 || n === 22 || n === 33 || n === 44 || n === 55 || n === 66 || n === 77 || n === 88))
       return "Dobbeltnummer: " + n;
     return "Nummer " + n + " – " + (MAX - count) + " tilbage";
   }
@@ -603,6 +613,17 @@
   // ---------- Events ----------
   drawBtn.addEventListener("click", draw);
   shakeBtn.addEventListener("click", shake);
+  nickBtn.addEventListener("click", () => {
+    const latest = drawn[drawn.length - 1];
+    if (latest === undefined || !NICKS[latest]) return;
+    if (window.JuleVoice) { window.JuleVoice.sayNick(latest); return; }
+    if (!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(NICKS[latest]);
+    u.lang = "da-DK";
+    u.rate = 0.9;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
   undoBtn.addEventListener("click", undo);
   resetBtn.addEventListener("click", reset);
   bankoBtn.addEventListener("click", openCheck);
