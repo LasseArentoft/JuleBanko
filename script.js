@@ -652,7 +652,7 @@
   // Sne der lægger sig i bunden af siden
   const STEP = 4;          // bredde pr. søjle i px
   const BASE = 5;          // snedybde fra start
-  const MAXH = 46;         // højeste snedrive
+  const MAXH = 34;         // højeste snedrive
   let ground = [];
 
   function sizeCanvas() {
@@ -668,6 +668,124 @@
     }));
     const cols = Math.ceil(canvas.width / STEP) + 1;
     ground = Array.from({ length: cols }, (_, i) => BASE + 2 * Math.sin(i / 9) + 1.5 * Math.sin(i / 3.7));
+    buildScene();
+  }
+
+  // Julescene i sneen: graner med lys, gaver og en snemand
+  let scene = null;      // færdigtegnet baggrund (tegnes kun ved størrelsesændring)
+  let treeLights = [];   // blinkende lys på grantræerne
+
+  function buildScene() {
+    const W = canvas.width, H = canvas.height;
+    const S = Math.max(0.6, Math.min(1.3, W / 1100));
+    scene = document.createElement("canvas");
+    scene.width = W; scene.height = H;
+    const g = scene.getContext("2d");
+    const base = H - 6;
+    treeLights = [];
+    if (W < 700) return; // på små skærme ville scenen ligge bag knapperne
+    const cols = ["#ff5a6e", "#ffd166", "#6ee7a0", "#7cc4ff"];
+
+    function tree(x, h, star) {
+      const w = h * 0.62;
+      g.fillStyle = "#5b3a24";
+      g.fillRect(x - h * 0.05, base - h * 0.14, h * 0.1, h * 0.2);
+      const tiers = 3;
+      for (let t = 0; t < tiers; t++) {
+        const top = base - h + (h * 0.8) * (t / tiers) * 0.85;
+        const bot = base - h * 0.12 - (h * 0.8) * ((tiers - 1 - t) / tiers) * 0.85;
+        const half = (w / 2) * (0.55 + 0.225 * (t + 1) / 1) * (t === 2 ? 0.95 : 0.9) ;
+        const hw = (w / 2) * (0.48 + 0.26 * t);
+        g.fillStyle = t % 2 ? "#1c6342" : "#257a50";
+        g.beginPath(); g.moveTo(x, top); g.lineTo(x + hw, bot); g.lineTo(x - hw, bot); g.closePath(); g.fill();
+        // sne på grenene
+        g.fillStyle = "rgba(255,255,255,0.92)";
+        g.beginPath();
+        g.moveTo(x, top);
+        g.lineTo(x + hw * 0.5, top + (bot - top) * 0.5);
+        g.quadraticCurveTo(x + hw * 0.2, top + (bot - top) * 0.42, x, top + (bot - top) * 0.52);
+        g.quadraticCurveTo(x - hw * 0.2, top + (bot - top) * 0.42, x - hw * 0.5, top + (bot - top) * 0.5);
+        g.closePath(); g.fill();
+        // lys
+        const n = 2 + t;
+        for (let i = 0; i < n; i++) {
+          const f = (i + 1) / (n + 1);
+          treeLights.push({ x: x - hw * 0.7 + hw * 1.4 * f, y: bot - 4 - ((i % 2) * 6) * S, c: cols[(i + t) % cols.length], p: Math.random() * 6 });
+        }
+        void half;
+      }
+      if (star) {
+        g.fillStyle = "#ffd166";
+        g.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = (i % 2 ? 0.035 : 0.08) * h, a = -Math.PI / 2 + i * Math.PI / 5;
+          g.lineTo(x + Math.cos(a) * r, base - h - 4 + Math.sin(a) * r);
+        }
+        g.closePath(); g.fill();
+      }
+    }
+
+    function gift(x, w, h, body, ribbon) {
+      g.fillStyle = body; g.fillRect(x, base - h, w, h + 6);
+      g.fillStyle = "rgba(255,255,255,0.18)"; g.fillRect(x, base - h, w * 0.28, h + 6);
+      g.fillStyle = ribbon;
+      g.fillRect(x + w / 2 - w * 0.07, base - h, w * 0.14, h + 6);
+      g.fillRect(x, base - h / 2 - h * 0.07, w, h * 0.14);
+      g.beginPath();
+      g.ellipse(x + w / 2 - w * 0.14, base - h - w * 0.07, w * 0.14, w * 0.09, -0.5, 0, 7);
+      g.ellipse(x + w / 2 + w * 0.14, base - h - w * 0.07, w * 0.14, w * 0.09, 0.5, 0, 7);
+      g.fill();
+    }
+
+    function snowman(x, k) {
+      const r1 = 26 * k, r2 = 19 * k, r3 = 14 * k;
+      const y1 = base - r1 + 6, y2 = y1 - r1 - r2 * 0.6, y3 = y2 - r2 - r3 * 0.55;
+      g.fillStyle = "#f7fbff";
+      for (const [y, r] of [[y1, r1], [y2, r2], [y3, r3]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+      g.fillStyle = "rgba(160,190,215,0.35)";
+      for (const [y, r] of [[y1, r1], [y2, r2], [y3, r3]]) { g.beginPath(); g.arc(x + r * 0.25, y + r * 0.2, r * 0.85, -0.2, 2.2); g.arc(x, y, r, 2.2, -0.2, true); g.fill(); }
+      g.fillStyle = "#222";
+      g.beginPath(); g.arc(x - r3 * 0.38, y3 - r3 * 0.2, 1.8 * k, 0, 7); g.arc(x + r3 * 0.38, y3 - r3 * 0.2, 1.8 * k, 0, 7); g.fill();
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x, y2 - r2 * 0.3 + i * r2 * 0.4, 2 * k, 0, 7); g.fill(); }
+      g.fillStyle = "#ff8a2b";
+      g.beginPath(); g.moveTo(x, y3 + r3 * 0.05); g.lineTo(x + r3 * 1.25, y3 + r3 * 0.3); g.lineTo(x, y3 + r3 * 0.35); g.closePath(); g.fill();
+      g.fillStyle = "#c62839";
+      g.fillRect(x - r3 * 1.05, y3 + r3 * 0.78, r3 * 2.1, 6 * k);
+      g.fillRect(x + r3 * 0.35, y3 + r3 * 0.78, 6 * k, 18 * k);
+      g.fillStyle = "#1d1d1d";
+      g.fillRect(x - r3 * 1.15, y3 - r3 * 0.8, r3 * 2.3, 3 * k);
+      g.fillRect(x - r3 * 0.7, y3 - r3 * 1.9, r3 * 1.4, r3 * 1.15);
+      g.fillStyle = "#c62839"; g.fillRect(x - r3 * 0.7, y3 - r3 * 1.1, r3 * 1.4, 3 * k);
+      g.strokeStyle = "#6b4a2b"; g.lineWidth = 2.5 * k; g.lineCap = "round";
+      g.beginPath(); g.moveTo(x - r2 * 0.9, y2); g.lineTo(x - r2 * 2, y2 - 10 * k); g.moveTo(x + r2 * 0.9, y2); g.lineTo(x + r2 * 2, y2 - 14 * k); g.stroke();
+    }
+
+    // venstre: graner og gaver
+    tree(W * 0.035, 170 * S, true);
+    tree(W * 0.095, 118 * S, false);
+    gift(W * 0.135, 30 * S, 26 * S, "#c62839", "#f0b94a");
+    gift(W * 0.158, 22 * S, 20 * S, "#2a8a5a", "#e2475a");
+    tree(W * 0.2, 80 * S, false);
+    // højre: snemand og graner
+    tree(W * 0.8, 84 * S, false);
+    snowman(W * 0.87, 1.05 * S);
+    tree(W * 0.925, 126 * S, false);
+    tree(W * 0.97, 176 * S, true);
+  }
+
+  function drawScene(t) {
+    if (!scene) return;
+    ctx.drawImage(scene, 0, 0);
+    for (const l of treeLights) {
+      const a = reduceMotion() ? 0.9 : 0.45 + 0.55 * Math.abs(Math.sin(t / 700 + l.p));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = l.c;
+      ctx.shadowColor = l.c;
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(l.x, l.y, 2.4, 0, 7); ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
   }
 
   function land(x, r) {
@@ -701,8 +819,9 @@
     ctx.fill();
   }
 
-  function snow() {
+  function snow(t) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawScene(t || 0);
     ctx.fillStyle = "rgba(255,255,255,0.75)";
     for (const f of flakes) {
       f.y += f.v;
@@ -724,7 +843,7 @@
   sizeCanvas();
   addEventListener("resize", sizeCanvas);
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) snow();
-  else drawGround();
+  else { drawScene(0); drawGround(); }
 
   // ---------- Julelys i toppen ----------
   (function lights() {
