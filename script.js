@@ -131,7 +131,6 @@
     statusEl.textContent = "Ryst, ryst, ryst…";
     hangerEl.classList.add("shaking");
     const duration = reduceMotion() ? 300 : SHAKE_MS;
-    playRattle(duration);
 
     setTimeout(() => {
       hangerEl.classList.remove("shaking");
@@ -169,7 +168,6 @@
     sparkleAt(105, 18); // glimt fra posens åbning
 
     const duration = reduceMotion() ? 200 : PULL_MS;
-    playRattle(Math.min(300, duration));
     setTimeout(playPlop, duration * 0.45);
 
     setTimeout(() => {
@@ -211,30 +209,6 @@
   }
 
   // ---------- Lyd til posen ----------
-  function playRattle(ms) {
-    const ac = getAudio();
-    if (!ac) return;
-    const t0 = ac.currentTime + 0.02;
-    const clicks = Math.round(ms / 40);
-    for (let i = 0; i < clicks; i++) {
-      const t = t0 + (i / clicks) * (ms / 1000) + rand(0, 0.025);
-      const len = Math.floor(ac.sampleRate * 0.03);
-      const buf = ac.createBuffer(1, len, ac.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let j = 0; j < len; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 2);
-      const src = ac.createBufferSource();
-      src.buffer = buf;
-      const f = ac.createBiquadFilter();
-      f.type = "bandpass";
-      f.frequency.value = rand(1800, 4400);
-      f.Q.value = 3;
-      const g = ac.createGain();
-      g.gain.value = rand(0.25, 0.65);
-      src.connect(f).connect(g).connect(ac.destination);
-      src.start(t);
-    }
-  }
-
   function playPlop() {
     const ac = getAudio();
     if (!ac) return;
