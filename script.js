@@ -131,7 +131,6 @@
     statusEl.textContent = "Ryst, ryst, ryst…";
     hangerEl.classList.add("shaking");
     const duration = reduceMotion() ? 300 : SHAKE_MS;
-    playShake(duration);
 
     setTimeout(() => {
       hangerEl.classList.remove("shaking");
@@ -210,31 +209,6 @@
   }
 
   // ---------- Lyd til posen ----------
-  // Blød rystelyd – kun når der trykkes "Ryst posen!"
-  function playShake(ms) {
-    const ac = getAudio();
-    if (!ac) return;
-    const t0 = ac.currentTime + 0.02;
-    const clicks = Math.round(ms / 70);
-    for (let i = 0; i < clicks; i++) {
-      const t = t0 + (i / clicks) * (ms / 1000) + rand(0, 0.03);
-      const len = Math.floor(ac.sampleRate * 0.05);
-      const buf = ac.createBuffer(1, len, ac.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let j = 0; j < len; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 3);
-      const src = ac.createBufferSource();
-      src.buffer = buf;
-      const f = ac.createBiquadFilter();
-      f.type = "bandpass";
-      f.frequency.value = rand(900, 2400);
-      f.Q.value = 1.2;
-      const g = ac.createGain();
-      g.gain.value = rand(0.12, 0.3);
-      src.connect(f).connect(g).connect(ac.destination);
-      src.start(t);
-    }
-  }
-
   function playPlop() {
     const ac = getAudio();
     if (!ac) return;
@@ -725,55 +699,6 @@
   addEventListener("resize", sizeCanvas);
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) snow();
   else drawGround();
-
-  // ---------- Julelys i toppen ----------
-  (function lights() {
-    const wrap = document.querySelector(".lights");
-    if (!wrap) return;
-    const cols = ["#e2475a", "#f0b94a", "#4fbf7f", "#5aa9e6"];
-    const n = Math.max(10, Math.floor(innerWidth / 55));
-    for (let i = 0; i < n; i++) {
-      const b = document.createElement("i");
-      b.style.setProperty("--c", cols[i % cols.length]);
-      b.style.setProperty("--d", (i * 0.37 % 2.4).toFixed(2) + "s");
-      wrap.appendChild(b);
-    }
-  })();
-
-  // ---------- Storskærm ----------
-  const bigBtn = $("bigBtn");
-  function fitBig() {
-    if (!document.body.classList.contains("big")) return;
-    const s = Math.max(0.8, Math.min(1.9, (innerHeight - 400) / 410, 540 / 260));
-    document.body.style.setProperty("--bs", s.toFixed(2));
-  }
-  function setBig(on) {
-    document.body.classList.toggle("big", on);
-    bigBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    bigBtn.textContent = on ? "Luk storskærm" : "Storskærm";
-    fitBig();
-    if (on) window.scrollTo(0, 0);
-  }
-  function toggleBig() {
-    const on = !document.body.classList.contains("big");
-    setBig(on);
-    try {
-      if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-      else if (!on && document.fullscreenElement) document.exitFullscreen();
-    } catch (e) {}
-  }
-  bigBtn.addEventListener("click", toggleBig);
-  addEventListener("resize", fitBig);
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement && document.body.classList.contains("big")) setBig(false);
-  });
-  addEventListener("keydown", (e) => {
-    if (e.key !== "f" && e.key !== "F") return;
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (dialog.open || $("voiceDialog")?.open || !celebEl.hidden) return;
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-    toggleBig();
-  });
 
   // ---------- Start ----------
   if (drawn.length) statusEl.textContent = statusFor(drawn.length, drawn[drawn.length - 1]);
