@@ -756,57 +756,18 @@ dialog.voice { width: min(94vw, 580px); max-height: 92vh; overflow-y: auto; }
 }
 @keyframes bulb { 50% { opacity: 0.45; box-shadow: 0 0 4px 1px var(--c); } }
 
-.brand { grid-column: 1 / -1; text-align: center; padding-top: 1rem; }
-.brand h1 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  line-height: 1;
-}
-.wm {
-  display: inline-block;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-size: clamp(1.3rem, 3.4vw, 1.9rem);
-  color: var(--snow);
-  padding: 0.15em 0.7em 0.2em;
-  border: 2px solid rgba(247, 243, 236, 0.85);
-  border-radius: 999px;
-}
-.wm b { color: var(--gold); font-weight: 800; }
-.jb { font-family: Fraunces, Georgia, serif; font-weight: 900; color: var(--gold); font-size: clamp(2.6rem, 8vw, 4.4rem); letter-spacing: -0.02em; }
-.tagline { margin: 0.5rem auto 0; max-width: 40rem; color: var(--muted); font-size: 0.95rem; }
-
-.foot {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 0.8rem 1.2rem;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(247, 243, 236, 0.15);
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.wm.small { font-size: 1rem; border-width: 1.5px; }
-
 /* ---------- Storskærm ---------- */
 body.big { --bs: 1.4; overflow-x: hidden; }
 body.big main { max-width: none; padding: 0.6rem 2rem 1.5rem; grid-template-columns: minmax(0, 560px) 1fr; gap: 0.5rem 3rem; align-items: center; }
-body.big .brand { padding-top: 0.6rem; }
-body.big .tagline, body.big .tools, body.big .recent, body.big .foot { display: none; }
-body.big .brand h1 { flex-direction: row; gap: 1rem; justify-content: center; }
-body.big .jb { font-size: 2.6rem; }
+body.big h1 { font-size: 2.6rem; padding-top: 0.4rem; }
+body.big .tools, body.big .recent { display: none; }
 body.big .hanger { transform: scale(var(--bs)); transform-origin: top center; margin-bottom: calc(410px * (var(--bs) - 1)); }
 body.big .status { font-size: 1.5rem; }
 body.big .nick { font-size: 1.6rem; }
 body.big .board { gap: 8px; max-width: calc((100vh - 190px) * 10 / 9); margin: 0 auto; }
 body.big .board-wrap h2 { text-align: center; }
-body.big .cell { font-size: clamp(1rem, 3.2vw, 2.6rem); }
+body.big .board { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+body.big .cell { font-size: clamp(0.9rem, 3.4vh, 2.4rem); }
 body.big .board-wrap h2 { font-size: 1.6rem; }
 body.big .actions { margin-top: 1rem; }
 

@@ -740,40 +740,24 @@
     }
   })();
 
-  // ---------- Storskærm ----------
-  const bigBtn = $("bigBtn");
+  // ---------- Storskærm (F11) ----------
+  // Når browseren er i fuld skærm (F11), skifter siden automatisk til den store visning.
+  const fsQuery = window.matchMedia("(display-mode: fullscreen)");
+  function isFull() {
+    return fsQuery.matches || !!document.fullscreenElement || (innerHeight >= screen.height - 2 && innerWidth >= screen.width - 2);
+  }
   function fitBig() {
-    if (!document.body.classList.contains("big")) return;
-    const s = Math.max(0.8, Math.min(1.9, (innerHeight - 400) / 410, 540 / 260));
-    document.body.style.setProperty("--bs", s.toFixed(2));
-  }
-  function setBig(on) {
+    const on = isFull();
     document.body.classList.toggle("big", on);
-    bigBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    bigBtn.textContent = on ? "Luk storskærm" : "Storskærm";
-    fitBig();
-    if (on) window.scrollTo(0, 0);
+    if (on) {
+      const s = Math.max(0.8, Math.min(1.9, (innerHeight - 330) / 410, 540 / 260));
+      document.body.style.setProperty("--bs", s.toFixed(2));
+    }
   }
-  function toggleBig() {
-    const on = !document.body.classList.contains("big");
-    setBig(on);
-    try {
-      if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-      else if (!on && document.fullscreenElement) document.exitFullscreen();
-    } catch (e) {}
-  }
-  bigBtn.addEventListener("click", toggleBig);
   addEventListener("resize", fitBig);
-  document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement && document.body.classList.contains("big")) setBig(false);
-  });
-  addEventListener("keydown", (e) => {
-    if (e.key !== "f" && e.key !== "F") return;
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (dialog.open || $("voiceDialog")?.open || !celebEl.hidden) return;
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-    toggleBig();
-  });
+  document.addEventListener("fullscreenchange", fitBig);
+  if (fsQuery.addEventListener) fsQuery.addEventListener("change", fitBig);
+  fitBig();
 
   // ---------- Start ----------
   if (drawn.length) statusEl.textContent = statusFor(drawn.length, drawn[drawn.length - 1]);
