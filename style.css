@@ -720,3 +720,36 @@ dialog.voice { width: min(94vw, 580px); max-height: 92vh; overflow-y: auto; }
   .celebration, .rays, .celeb-word, .celeb-word span, .celeb-prize, .celeb-hint { animation: none; }
   .nick, .reveal.emerge, .reveal.emerge #number, .reveal.emerge::before, .twinkle, .hanger.shaking .reveal, .hanger.shaking .sack, .hanger.shaking .sack-back, .hanger.pulling .sack, .hanger.pulling .sack-back, .hanger.shaking .shout { animation: none; }
 }
+
+/* ---------- Julelys i toppen ---------- */
+.lights {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 26px;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-around;
+  overflow: hidden;
+}
+.lights i {
+  flex: none;
+  width: 10px; height: 15px;
+  margin-top: 6px;
+  border-radius: 50% 50% 50% 50% / 35% 35% 65% 65%;
+  background: var(--c);
+  box-shadow: 0 0 10px 3px var(--c);
+  animation: bulb 2.4s ease-in-out infinite;
+  animation-delay: var(--d);
+  position: relative;
+}
+.lights i::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: -6px;
+  width: 4px; height: 6px;
+  margin-left: -2px;
+  background: #1b1f1d;
+}
+@keyframes bulb { 50% { opacity: 0.45; box-shadow: 0 0 4px 1px var(--c); } }
+@media (prefers-reduced-motion: reduce) { .lights i { animation: none; } }
